@@ -151,6 +151,17 @@
   .concept h3 { font-size: 13px; font-weight: 700; color: var(--green-dark); margin-bottom: 6px; }
   .concept p { font-size: 13px; color: var(--text-sub); line-height: 1.7; }
 
+  .dev-note {
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 13px 14px;
+    margin-bottom: 10px;
+    background: var(--surface);
+  }
+  .dev-note h3 { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 8px; }
+  .dev-note ul { padding-left: 18px; display: flex; flex-direction: column; gap: 6px; }
+  .dev-note li { font-size: 13px; color: var(--text-sub); line-height: 1.65; }
+
   .btn-row { display: flex; gap: 8px; margin-top: 16px; }
   .btn {
     flex: 1; padding: 13px; border-radius: var(--radius-sm);
@@ -257,12 +268,12 @@
 
 <header class="app-header">
   <h1>📚 추천 시스템 학습 허브</h1>
-  <p>hyxxnii 블로그 · 33개 챕터 · Fastcampus 강의 기반</p>
+  <p>hyxxnii 블로그 · 32개 챕터 · Fastcampus 강의 기반</p>
   <div class="progress-wrap">
     <div class="progress-track">
       <div class="progress-fill" id="prog-fill" style="width:0%"></div>
     </div>
-    <div class="progress-label" id="prog-label">0 / 33 챕터 완료</div>
+    <div class="progress-label" id="prog-label">0 / 32 챕터 완료</div>
   </div>
 </header>
 
@@ -687,6 +698,137 @@ const LESSONS = [
   }
 ];
 
+const PRACTICAL_NOTES = {
+  0: [
+    { h:"백엔드 관점", items:["추천 시스템은 보통 로그 수집, 피처 생성, 후보 생성, 랭킹, 노출 API, 피드백 수집 파이프라인으로 나뉜다. 단순히 모델 하나를 붙이는 작업이 아니라 사용자 행동 데이터가 계속 순환하는 서비스 구조다.", "User, Item, Event 테이블을 명확히 분리하는 것이 중요하다. 예를 들어 user_id, item_id, event_type, timestamp, context를 안정적으로 쌓아야 이후 어떤 알고리즘도 적용할 수 있다."] },
+    { h:"실무 적용", items:["초기에는 인기 상품, 카테고리별 인기, 최근 본 상품 기반 추천처럼 규칙 기반으로 시작하고, 로그가 쌓이면 CF나 딥러닝 모델로 고도화하는 방식이 현실적이다.", "추천 API는 보통 '사용자 ID와 현재 맥락을 받아 Top-N item_id를 반환'하고, 상품 상세 정보 조인은 별도 상품 서비스나 BFF에서 처리하는 구조가 유지보수에 좋다."] }
+  ],
+  1: [
+    { h:"백엔드 관점", items:["Content-based는 상품 메타데이터 품질이 핵심이고, Collaborative Filtering은 사용자 행동 로그 품질이 핵심이다. Hybrid는 두 데이터 소스를 모두 사용하므로 데이터 계약과 스키마 관리가 더 중요하다.", "실서비스에서는 하나의 알고리즘만 쓰기보다 recall 후보를 여러 소스에서 만들고, 최종 랭킹 모델이나 비즈니스 룰로 합치는 구조가 많다."] },
+    { h:"실무 적용", items:["신규 서비스라면 콘텐츠 기반과 인기 랭킹으로 시작한다. 사용자가 늘고 구매/클릭 로그가 충분해지면 Item-based CF, MF, BPR 같은 협업 필터링을 추가한다.", "위치, 시간, 디바이스, 재고, 프로모션은 추천 모델 외부의 필터나 re-ranker로 먼저 붙이면 모델 변경 없이 빠르게 효과를 볼 수 있다."] }
+  ],
+  2: [
+    { h:"백엔드 관점", items:["RMSE는 실제 평점 r_ui와 예측 평점 사이의 오차를 계산한다. 따라서 별점, 만족도 점수처럼 명시적 레이블이 있는 서비스에 적합하다.", "배치 평가에서는 train/test split 기준이 중요하다. 시간 순서를 무시하고 랜덤 분할하면 미래 데이터를 보고 과거를 예측하는 누수가 생길 수 있다."] },
+    { h:"실무 적용", items:["영화, 강의, 숙소처럼 사용자가 별점을 남기는 도메인에서는 RMSE를 오프라인 지표로 사용하기 좋다.", "하지만 홈 화면 Top-N 추천처럼 순서가 중요한 화면에서는 RMSE만 보면 안 된다. RMSE가 좋아져도 클릭률, 구매전환, NDCG가 나빠질 수 있다."] }
+  ],
+  3: [
+    { h:"백엔드 관점", items:["NDCG는 추천 리스트의 순서를 평가한다. API가 반환한 Top-N item_id 목록과 실제 클릭/구매된 아이템의 relevance를 비교해 계산한다.", "랭킹 로그를 남길 때 request_id, 노출 순서, item_id, 클릭/구매 여부를 함께 저장해야 NDCG 같은 랭킹 지표를 제대로 계산할 수 있다."] },
+    { h:"실무 적용", items:["검색 결과, 홈 추천, 장바구니 추천처럼 상단 위치의 가치가 큰 화면에 적합하다.", "오프라인 NDCG가 좋아져도 실제 매출이 오르지 않을 수 있으므로 CTR, CVR, 매출, 체류 시간, 이탈률과 함께 A/B 테스트로 검증해야 한다."] }
+  ],
+  4: [
+    { h:"백엔드 관점", items:["아이템을 벡터로 만드는 과정이 핵심이다. 상품명, 설명, 카테고리, 브랜드, 태그, 가격대, 이미지 임베딩 등을 하나의 item feature vector로 구성한다.", "추천 요청 시 사용자가 좋아한 아이템 벡터를 평균내 user profile vector를 만들고, 벡터 검색 엔진이나 ANN 인덱스에서 가까운 아이템을 찾는 식으로 구현한다."] },
+    { h:"실무 적용", items:["신규 상품 추천에 강하다. 구매 로그가 없는 새 상품도 설명, 카테고리, 이미지가 있으면 기존 상품과 유사도를 계산할 수 있다.", "단점은 사용자가 이미 좋아한 것과 비슷한 것만 계속 보여주기 쉽다는 점이다. 운영에서는 다양성 슬롯이나 탐색용 추천을 섞어야 한다."] }
+  ],
+  5: [
+    { h:"백엔드 관점", items:["KNN은 온라인 요청 때 모든 아이템과 비교하면 느리다. 보통 배치로 item-item similarity를 미리 계산해 Redis, DB, 검색 인덱스에 저장한다.", "대규모 벡터에서는 brute-force 대신 FAISS, Annoy, HNSW 같은 ANN 방식을 사용해 가까운 이웃을 빠르게 찾는다."] },
+    { h:"실무 적용", items:["상품 상세 페이지의 '비슷한 상품' 영역에 바로 쓰기 좋다. 현재 item_id를 기준으로 미리 계산된 유사 상품 목록을 조회하면 된다.", "K값은 화면 크기보다 넉넉히 잡고, 품절/중복/이미 구매한 상품을 후처리에서 제거할 수 있게 후보를 충분히 저장하는 것이 좋다."] }
+  ],
+  6: [
+    { h:"백엔드 관점", items:["나이브베이즈는 텍스트를 토큰화하고 각 클래스별 단어 출현 확률을 저장하는 방식이라 구현과 서빙이 가볍다.", "추천에서는 사용자가 특정 카테고리나 취향 클래스를 좋아할 확률을 추정하고, 그 확률이 높은 카테고리의 아이템을 후보로 뽑는 데 사용할 수 있다."] },
+    { h:"실무 적용", items:["리뷰, 문의, 검색어를 기반으로 사용자의 관심 카테고리를 빠르게 분류할 때 유용하다. 예를 들어 '민감성', '수분', '무향' 단어가 반복되면 관련 상품군 점수를 높인다.", "최신 딥러닝 모델보다 정확도는 낮을 수 있지만 설명 가능하고 빠르기 때문에 초기 베이스라인이나 백오피스 자동 분류에 적합하다."] }
+  ],
+  7: [
+    { h:"백엔드 관점", items:["TF-IDF는 문서 모음을 기준으로 IDF를 계산하므로, 상품 설명이나 리뷰 코퍼스가 변경되면 주기적으로 재계산해야 한다.", "결과 벡터는 희소 벡터가 되기 때문에 검색 엔진의 vector field나 별도 sparse vector 저장 구조를 고려해야 한다."] },
+    { h:"실무 적용", items:["상품 설명 기반 유사 상품, 리뷰 키워드 기반 추천, 검색어와 상품의 텍스트 매칭에 적용하기 쉽다.", "한국어 서비스에서는 형태소 분석, 불용어 제거, 동의어 사전 관리가 품질을 크게 좌우한다. '스킨', '토너'처럼 도메인 동의어를 정리해야 한다."] }
+  ],
+  8: [
+    { h:"백엔드 관점", items:["협업 필터링은 사용자-아이템 상호작용 행렬을 만든다. 클릭, 찜, 장바구니, 구매를 각각 다른 가중치로 점수화해 implicit rating으로 변환하는 설계가 중요하다.", "행렬은 매우 희소하므로 모든 셀을 저장하지 않고 event log나 sparse matrix 형태로 다룬다."] },
+    { h:"실무 적용", items:["'이 상품을 본 사용자가 함께 본 상품', '나와 비슷한 사용자가 산 상품' 같은 영역에 적합하다.", "신규 사용자와 신규 아이템에는 약하므로 인기 상품, 콘텐츠 기반 추천, 온보딩 관심사 선택과 함께 운영하는 것이 일반적이다."] }
+  ],
+  9: [
+    { h:"백엔드 관점", items:["User-based는 요청 사용자와 유사한 사용자를 찾고, Item-based는 현재 아이템과 유사한 아이템을 찾는다. 대규모 서비스에서는 Item-based가 캐싱과 배치 계산에 유리하다.", "Item-item similarity 테이블은 item_id, similar_item_id, score, updated_at 형태로 두면 API에서 빠르게 조회할 수 있다."] },
+    { h:"실무 적용", items:["상품 상세 페이지나 장바구니 추천은 Item-based가 잘 맞는다. 사용자별 개인화 홈 피드는 User-based나 모델 기반 방식을 섞는 편이 좋다.", "사용자 취향은 자주 변하지만 아이템 간 관계는 상대적으로 안정적이라 Item-based는 매일 또는 몇 시간 단위 배치 갱신으로도 운영 가능하다."] }
+  ],
+  10: [
+    { h:"백엔드 관점", items:["자카드는 클릭/구매 여부처럼 0/1 집합 데이터에 단순하고 강하다. 피어슨은 사용자마다 평점 기준이 다른 explicit rating에서 유용하다.", "유사도 계산 전에 최소 공통 아이템 수, 최소 이벤트 수 같은 필터를 두지 않으면 우연히 겹친 데이터가 높은 점수를 받을 수 있다."] },
+    { h:"실무 적용", items:["구매 집합 기반 '같이 산 상품'은 자카드나 코사인으로 빠르게 만들 수 있다.", "별점이 있는 서비스에서는 피어슨을 쓰면 늘 5점을 주는 사용자와 평균 3점을 주는 사용자의 기준 차이를 어느 정도 보정할 수 있다."] }
+  ],
+  11: [
+    { h:"백엔드 관점", items:["이웃기반은 원본 로그와 유사도 테이블을 직접 조회하는 방식이고, 모델기반은 학습된 파라미터나 임베딩을 서빙한다.", "모델기반으로 갈수록 학습 파이프라인, 모델 버전 관리, 배포, 롤백, 모니터링이 필요해진다."] },
+    { h:"실무 적용", items:["트래픽이 작고 빠른 검증이 필요하면 이웃기반으로 시작하는 것이 빠르다.", "사용자와 아이템이 많아지고 개인화 품질이 중요해지면 MF, BPR, FM 같은 모델기반으로 넘어가는 것이 확장성 면에서 유리하다."] }
+  ],
+  12: [
+    { h:"백엔드 관점", items:["Association Rule은 거래 단위 basket을 먼저 정의해야 한다. 주문 1건, 세션 1개, 하루 단위 사용자 행동 중 무엇을 basket으로 볼지에 따라 결과가 달라진다.", "생성된 규칙은 antecedent, consequent, support, confidence, lift 형태로 저장해 추천 API나 마케팅 자동화에서 조회할 수 있다."] },
+    { h:"실무 적용", items:["장바구니의 '함께 구매하면 좋은 상품', 쿠폰 번들, 세트 상품 구성에 적합하다.", "인기 상품은 support와 confidence가 높게 나오기 쉬우므로 lift를 같이 봐야 진짜 연관 관계인지 판단할 수 있다."] }
+  ],
+  13: [
+    { h:"백엔드 관점", items:["MF는 user_id와 item_id를 각각 embedding vector로 바꾸고, 두 벡터의 내적으로 선호 점수를 예측한다고 보면 된다.", "학습 결과는 user embedding 테이블과 item embedding 테이블로 저장하고, 서빙에서는 user vector와 item vector의 dot product 또는 ANN 검색으로 후보를 만든다."] },
+    { h:"실무 적용", items:["로그가 충분한 커머스, 콘텐츠, 강의 플랫폼의 개인화 추천 베이스라인으로 좋다.", "잠재 요인은 사람이 직접 이름 붙인 카테고리는 아니지만, 실제로는 가격 민감도, 브랜드 선호, 장르 취향 같은 패턴을 압축해 담는다."] }
+  ],
+  14: [
+    { h:"백엔드 관점", items:["SGD는 관측된 이벤트를 샘플링해 조금씩 파라미터를 업데이트한다. 스트리밍이나 incremental update에 응용하기 좋지만 튜닝에 민감하다.", "ALS는 user factor와 item factor를 번갈아 고정하고 풀기 때문에 Spark MLlib 같은 분산 처리에 잘 맞는다."] },
+    { h:"실무 적용", items:["대규모 배치 학습 환경에서는 ALS가 운영하기 편하다. 사용자 행동이 빠르게 변하는 서비스에서는 SGD 계열이나 온라인 업데이트를 고려한다.", "정규화 계수, latent dimension, negative sampling, 학습 기간 window가 추천 품질과 비용을 크게 좌우한다."] }
+  ],
+  15: [
+    { h:"백엔드 관점", items:["Explicit은 별점처럼 값이 명확하지만 양이 적다. Implicit은 클릭, 조회, 구매처럼 많지만 의도가 불명확하므로 event_type별 가중치 설계가 필요하다.", "예를 들어 view=1, click=2, cart=4, purchase=8처럼 점수화하되, 반복 조회나 봇 트래픽을 제거해야 한다."] },
+    { h:"실무 적용", items:["대부분의 커머스 추천은 implicit feedback 중심으로 운영된다. 사용자가 별점을 남기지 않아도 클릭과 구매는 계속 쌓이기 때문이다.", "클릭은 낚시성 썸네일에도 발생할 수 있으므로 구매, 재방문, 긴 체류 같은 더 강한 신호와 함께 봐야 한다."] }
+  ],
+  16: [
+    { h:"백엔드 관점", items:["BPR은 '사용자가 본 아이템 i가 보지 않은 아이템 j보다 선호된다'는 pairwise 학습 데이터를 만든다.", "negative item을 어떻게 샘플링하느냐가 중요하다. 완전 랜덤은 너무 쉬운 음성 샘플이 많고, 인기 아이템 중심 hard negative를 섞으면 랭킹 품질이 좋아질 수 있다."] },
+    { h:"실무 적용", items:["평점 예측보다 Top-N 순위가 중요한 홈 피드, 상품 추천, 콘텐츠 추천에 적합하다.", "클릭하지 않은 아이템을 정말 싫어한다고 볼 수는 없으므로, 노출됐지만 클릭하지 않은 아이템과 아예 노출되지 않은 아이템을 구분하는 로그 설계가 중요하다."] }
+  ],
+  17: [
+    { h:"백엔드 관점", items:["Hybrid는 여러 candidate generator의 결과를 합치는 구조로 구현하는 경우가 많다. 예를 들어 인기, 콘텐츠 유사도, CF, 프로모션 후보를 각각 N개씩 가져온 뒤 dedupe와 ranking을 수행한다.", "각 후보가 어떤 source에서 왔는지 source tag를 남겨야 디버깅과 성과 분석이 가능하다."] },
+    { h:"실무 적용", items:["신규 사용자에게는 인기/콘텐츠 기반 비중을 높이고, 이력이 많은 사용자에게는 CF/모델 기반 비중을 높이는 식으로 상황별 전략을 바꿀 수 있다.", "추천 결과가 왜 나왔는지 CS나 운영자가 확인할 수 있게 source와 score를 내부 로그에 남기는 것이 좋다."] }
+  ],
+  18: [
+    { h:"백엔드 관점", items:["Context는 요청 시점에 들어오는 runtime feature다. timestamp, location, device, referrer, weather, campaign 등이 포함될 수 있다.", "모델 입력에 넣을 수도 있고, 후처리 필터로 사용할 수도 있다. 빠른 적용은 후처리, 정교한 개인화는 모델 입력 방식이 유리하다."] },
+    { h:"실무 적용", items:["점심시간에는 음식 추천, 비 오는 날에는 우산/방수 상품, 모바일에서는 짧은 콘텐츠를 우선 노출하는 식의 맥락 추천이 가능하다.", "개인정보와 위치정보는 수집 동의, 보관 기간, 익명화 정책을 반드시 함께 설계해야 한다."] }
+  ],
+  19: [
+    { h:"백엔드 관점", items:["Pre-filtering은 후보 생성 전에 데이터 범위를 줄인다. Post-filtering은 모델 점수 계산 후 결과 리스트를 조정한다.", "재고, 판매 가능 지역, 성인 인증, 차단 상품처럼 반드시 지켜야 하는 조건은 모델 점수와 무관하게 hard filter로 처리해야 한다."] },
+    { h:"실무 적용", items:["Pre-filtering은 배달 가능 매장, 배송 가능 지역처럼 추천 대상 자체가 제한되는 경우에 좋다.", "Post-filtering은 품절 제거, 이미 구매한 상품 제외, 캠페인 상품 부스팅처럼 운영 정책을 빠르게 반영할 때 좋다."] }
+  ],
+  20: [
+    { h:"백엔드 관점", items:["위치 추천은 좌표를 그대로 쓰기보다 geohash, 행정동 코드, 매장 반경, 배송 권역 같은 서비스 단위로 정규화하는 것이 운영에 편하다.", "거리 계산은 DB의 geospatial index나 검색 엔진의 geo query를 활용하고, 추천 모델 점수와 거리 penalty를 함께 계산한다."] },
+    { h:"실무 적용", items:["배달, 오프라인 매장 재고, 주변 이벤트, 여행지 추천에 적합하다.", "GPS 오차, 실내 위치 부정확성, 사용자의 현재 위치와 실제 소비 위치가 다를 수 있다는 점을 고려해 최근 방문 지역이나 기본 주소도 함께 본다."] }
+  ],
+  21: [
+    { h:"백엔드 관점", items:["FM은 sparse categorical feature를 one-hot 또는 embedding 형태로 넣고 feature 간 2차 상호작용을 학습한다.", "CTR 예측용으로 user_id, item_id, category, brand, price_bucket, device, hour 같은 피처를 넣으면 조합 효과를 자동으로 학습할 수 있다."] },
+    { h:"실무 적용", items:["광고 클릭 예측, 추천 랭킹, 쿠폰 반응 예측처럼 범주형 피처가 많은 문제에 강하다.", "피처 해싱, missing value 처리, train/serve feature consistency가 중요하다. 학습 때 만든 피처와 서빙 때 만든 피처가 다르면 품질이 급격히 무너진다."] }
+  ],
+  22: [
+    { h:"백엔드 관점", items:["Wide 파트는 명시적인 cross feature를 기억하고, Deep 파트는 embedding 기반 일반화를 담당한다.", "서빙에서는 categorical feature lookup, dense feature normalize, wide feature hashing을 동일한 feature pipeline에서 처리해야 한다."] },
+    { h:"실무 적용", items:["앱 설치 추천, 상품 클릭 예측, 검색 광고 랭킹처럼 과거에 강하게 검증된 조합과 새로운 조합을 동시에 다뤄야 하는 곳에 적합하다.", "Wide feature를 너무 많이 만들면 관리가 어려워지고, 너무 적게 만들면 memorization 장점이 줄어든다. 운영자가 이해할 수 있는 핵심 교차 피처부터 시작하는 것이 좋다."] }
+  ],
+  23: [
+    { h:"백엔드 관점", items:["DeepFM은 FM과 DNN이 embedding을 공유하므로 feature engineering 부담을 줄이면서 저차/고차 상호작용을 같이 학습한다.", "학습 파이프라인은 CTR label 생성, negative sampling, feature dictionary 관리, embedding checkpoint 저장이 핵심이다."] },
+    { h:"실무 적용", items:["추천 리스트의 최종 ranking model로 많이 쓸 수 있다. 후보 생성 단계에서 뽑힌 수백 개 아이템을 DeepFM으로 재정렬하는 구조가 현실적이다.", "모든 아이템을 DeepFM으로 실시간 점수화하면 비용이 크므로 candidate 수를 줄인 뒤 ranking에 사용하는 것이 일반적이다."] }
+  ],
+  24: [
+    { h:"백엔드 관점", items:["AutoRec은 사용자 또는 아이템의 rating vector를 입력으로 받아 빈 값을 복원한다. 입력 벡터의 결측값 마스킹 처리가 핵심이다.", "관측된 평점에 대해서만 loss를 계산해야 한다. 미관측을 0점으로 학습하면 '평가하지 않음'을 '싫어함'으로 오해하게 된다."] },
+    { h:"실무 적용", items:["평점 데이터가 있는 영화, 강의, 도서 추천에서 적용하기 좋다.", "커머스처럼 explicit rating이 적은 도메인에서는 클릭/구매를 implicit score로 변환해 쓰거나, VAE/implicit MF 계열이 더 자연스러울 수 있다."] }
+  ],
+  25: [
+    { h:"백엔드 관점", items:["Deep AutoEncoder는 더 깊은 encoder/decoder를 사용해 복잡한 상호작용을 학습한다. 대신 학습 안정성과 과적합 관리가 더 어렵다.", "Dropout, normalization, early stopping, validation split을 잘 구성해야 한다. 데이터가 충분하지 않으면 얕은 모델보다 오히려 나빠질 수 있다."] },
+    { h:"실무 적용", items:["대규모 평점/시청 이력이 있는 콘텐츠 플랫폼에서 사용자 취향 복원 모델로 사용할 수 있다.", "모델이 깊어질수록 추론 비용도 늘기 때문에 실시간 API에서 직접 돌릴지, 배치로 사용자별 추천 결과를 미리 계산할지 결정해야 한다."] }
+  ],
+  26: [
+    { h:"백엔드 관점", items:["VAE는 user interaction vector를 잠재 분포로 인코딩한 뒤 아이템 선호 분포를 복원한다. implicit feedback 기반 Top-N 추천에 많이 쓰인다.", "학습에는 reconstruction loss와 KL divergence가 함께 들어가며, annealing 같은 기법으로 KL 항의 영향력을 조절하기도 한다."] },
+    { h:"실무 적용", items:["사용자 취향이 넓고 다양한 콘텐츠 추천에서 다양성 있는 후보를 만들기 좋다.", "샘플링 때문에 결과가 매번 달라질 수 있으므로 서비스에서는 seed, 캐싱, diversity 정책을 정해 사용자 경험이 지나치게 흔들리지 않게 해야 한다."] }
+  ],
+  27: [
+    { h:"백엔드 관점", items:["리뷰 기반 추천은 평점 테이블 외에 review text pipeline이 필요하다. 토큰화, 정제, 임베딩 생성, 감성/속성 추출을 별도 배치나 스트리밍으로 구성한다.", "사용자 리뷰와 상품 리뷰를 함께 학습하면 user preference embedding과 item attribute embedding을 더 풍부하게 만들 수 있다."] },
+    { h:"실무 적용", items:["뷰티, 숙소, 음식처럼 텍스트 리뷰가 풍부한 도메인에서 강하다. '향', '발림성', '소음', '청결' 같은 속성 단위 취향을 추천에 반영할 수 있다.", "리뷰에는 광고성 문구, 악성 리뷰, 개인정보가 섞일 수 있으므로 필터링과 개인정보 마스킹을 먼저 설계해야 한다."] }
+  ],
+  28: [
+    { h:"백엔드 관점", items:["이미지 추천은 상품 이미지를 CNN이나 비전 모델로 embedding한 뒤 유사도 검색이나 ranking feature로 사용한다.", "이미지 embedding은 온라인 요청 때 매번 만들지 않고 상품 등록/수정 시점이나 배치에서 미리 생성해 저장한다."] },
+    { h:"실무 적용", items:["패션의 코디 추천, 인테리어의 어울리는 가구 추천, 뷰티의 컬러 유사 상품 추천에 적합하다.", "이미지 품질, 배경, 촬영 각도에 민감하므로 대표 이미지 선정과 이미지 전처리가 추천 품질에 직접 영향을 준다."] }
+  ],
+  29: [
+    { h:"백엔드 관점", items:["VBPR은 BPR의 user-item ranking loss에 visual feature를 추가한다. item embedding과 image embedding을 함께 사용해 시각적 선호를 학습한다.", "상품 이미지 feature는 미리 추출하고, 학습 데이터는 구매/클릭한 positive item과 sampled negative item 쌍으로 구성한다."] },
+    { h:"실무 적용", items:["패션/뷰티처럼 외형이 구매 결정에 큰 영향을 주는 카테고리에서 신규 상품 cold start를 완화한다.", "이미지가 비슷해도 가격, 브랜드, 재고, 배송 조건이 다르면 전환율이 달라지므로 최종 랭킹에서는 비주얼 점수만 쓰면 안 된다."] }
+  ],
+  30: [
+    { h:"백엔드 관점", items:["세션 추천은 user_id가 없어도 session_id 기준 이벤트 시퀀스를 만든다. event order와 timestamp가 모델 입력의 핵심이다.", "실시간 추천 API에서는 현재 세션의 최근 N개 item_id를 받아 다음 아이템 후보를 반환하는 형태로 구현할 수 있다."] },
+    { h:"실무 적용", items:["비로그인 사용자가 많은 쇼핑몰, 뉴스, 영상 서비스에서 효과적이다. 방금 본 상품 흐름을 보고 다음 클릭을 예측한다.", "세션 경계 정의가 중요하다. 30분 무활동 기준, 날짜 기준, 앱 재시작 기준 중 어떤 것을 쓰느냐에 따라 학습 데이터가 달라진다."] }
+  ],
+  31: [
+    { h:"백엔드 관점", items:["YouTube식 추천은 candidate generation과 ranking을 분리한다. 첫 단계는 수백만 개 콘텐츠에서 수백 개 후보를 빠르게 줄이고, 두 번째 단계에서 정교하게 점수화한다.", "watch time, freshness, user history, context, diversity, policy filter가 함께 들어간다. 단일 모델 점수만으로 최종 노출을 결정하지 않는다."] },
+    { h:"실무 적용", items:["대규모 서비스에서는 추천 목표를 CTR 하나로 두면 자극적인 콘텐츠가 과도하게 올라갈 수 있다. 시청 시간, 만족도, 신고율, 재방문 같은 장기 지표를 같이 봐야 한다.", "시간 순서를 지키는 학습 데이터 구성이 중요하다. 미래 행동을 피처로 넣는 데이터 누수가 생기면 오프라인 성능은 높지만 실제 서비스에서 실패한다."] }
+  ]
+};
+
 const ALL_IDS = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31];
 let currentLesson = 0;
 let completedLessons = new Set();
@@ -719,6 +861,7 @@ function goLesson(idx) {
 
 function renderLesson(idx) {
   const l = getLessonData(idx);
+  const notes = PRACTICAL_NOTES[idx] || [];
   buildSelector('ch-selector', goLesson);
   const done = completedLessons.has(idx);
   document.getElementById('lesson-body').innerHTML = `
@@ -729,9 +872,10 @@ function renderLesson(idx) {
     <div class="lesson-title" style="margin-top:8px;">${l.ch}. ${l.title}</div>
     <div class="lesson-meta">
       <a href="${l.url}" target="_blank">📝 원본 블로그</a>
-      <span>${l.concepts.length}개 핵심 개념</span>
+      <span>${l.concepts.length}개 핵심 개념 · ${notes.length}개 실무 노트</span>
     </div>
     ${l.concepts.map(c => `<div class="concept"><h3>${c.h}</h3><p>${c.p}</p></div>`).join('')}
+    ${notes.map(n => `<div class="dev-note"><h3>${n.h}</h3><ul>${n.items.map(item => `<li>${item}</li>`).join('')}</ul></div>`).join('')}
     <div class="btn-row">
       <button class="btn" onclick="markDone(${idx})">${done ? '✓ 완료됨' : '학습 완료'}</button>
       <button class="btn primary" onclick="goQuiz(${idx})">퀴즈 풀기 →</button>
@@ -761,9 +905,10 @@ function updateChips() {
 }
 
 function updateProgress() {
-  const pct = Math.round((completedLessons.size / 33) * 100);
+  const total = LESSONS.length;
+  const pct = Math.round((completedLessons.size / total) * 100);
   document.getElementById('prog-fill').style.width = pct + '%';
-  document.getElementById('prog-label').textContent = completedLessons.size + ' / 33 챕터 완료';
+  document.getElementById('prog-label').textContent = completedLessons.size + ' / ' + total + ' 챕터 완료';
 }
 
 function goQuiz(idx) {
