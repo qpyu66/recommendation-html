@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-title" content="RecSys 학습">
 <meta name="theme-color" content="#1D9E75">
 <title>추천 시스템 학습 허브</title>
-<link rel="stylesheet" href="css/styles.css">
+<link rel="stylesheet" href="css/styles.css?v=search-20260621">
 </head>
 <body>
 
@@ -27,6 +27,19 @@
 
   <!-- ① 로드맵 화면 -->
   <div class="screen active" id="screen-map">
+    <div class="search-panel">
+      <label class="search-label" for="lesson-search-input">키워드로 학습 영역 찾기</label>
+      <input
+        class="search-input"
+        id="lesson-search-input"
+        type="search"
+        placeholder="예: 검색, 단어, BPR, 학습 데이터"
+        autocomplete="off"
+        oninput="renderSearchResults(this.value)"
+      >
+    </div>
+    <div id="search-results"></div>
+
     <div class="type-filter-row">
       <button class="type-filter-btn active" data-type="all"       onclick="filterRoadmap('all')">전체</button>
       <button class="type-filter-btn" data-type="model"     onclick="filterRoadmap('model')">모델</button>
@@ -460,6 +473,75 @@ GET /health
 
     </div>
 
+    <div class="section-label" style="margin:20px 0 10px;">현재 코드에서 역할 구분하기</div>
+
+    <div class="tune-card">
+      <div class="tune-card-file">data/*.csv · src/data_loader.py</div>
+      <div class="tune-card-title">데이터 영역 · DS/개발 공동 관심</div>
+      <div class="tune-card-desc">events, users, items는 모델의 원천 입력입니다. DS는 어떤 로그를 학습 신호로 볼지 판단하고, 개발팀은 서비스에서 이 로그가 안정적으로 쌓이고 스키마가 유지되는지 봅니다.</div>
+    </div>
+
+    <div class="tune-card">
+      <div class="tune-card-file">src/features.py · src/config.py</div>
+      <div class="tune-card-title">피처 변환 영역 · DS 주도, 개발팀 검증 필요</div>
+      <div class="tune-card-desc">EVENT_WEIGHTS, 시간 감쇠, 유저/아이템 프로필 생성은 모델 품질에 직접 영향을 줍니다. 동시에 학습 때 만든 피처와 서빙 때 쓰는 피처가 달라지면 장애처럼 보이는 품질 문제가 생기므로 개발팀도 schema와 재현성을 확인해야 합니다.</div>
+    </div>
+
+    <div class="tune-card">
+      <div class="tune-card-file">src/models/cbf.py · src/models/cf.py · src/models/hybrid.py</div>
+      <div class="tune-card-title">모델 로직 영역 · DS 주도</div>
+      <div class="tune-card-desc">CBF/CF/Hybrid 점수 계산은 모델 내부 판단입니다. 어떤 알고리즘을 쓰고 어떤 유사도를 더 신뢰할지는 DS가 주도하는 영역입니다. 개발팀은 내부 공식을 결정하기보다 입력, 출력, latency, artifact 형식을 이해하는 쪽에 가깝습니다.</div>
+    </div>
+
+    <div class="tune-card">
+      <div class="tune-card-file">src/pipeline.py · artifacts/*.json</div>
+      <div class="tune-card-title">운영 인수 경계 · DS 산출물이 서비스 산출물로 바뀌는 지점</div>
+      <div class="tune-card-desc">pipeline.py는 모델 결과를 recommendations.json, user_profiles.json, item_profiles.json, popular_items.json으로 고정합니다. 개발팀이 서빙에서 인수하는 것은 DS의 노트북이나 모델 내부 코드가 아니라, 재현 가능하고 검증 가능한 artifact입니다.</div>
+    </div>
+
+    <div class="tune-card">
+      <div class="tune-card-file">src/serve.py</div>
+      <div class="tune-card-title">서빙 영역 · 개발팀 주도</div>
+      <div class="tune-card-desc">API 요청 처리, fallback, 응답 형식, 서버 상태 확인은 서비스 안정성 영역입니다. 모델 품질 판단은 DS와 협업하되, 운영 중 장애 대응, latency, rollback, 모니터링 기준은 개발팀 책임에 가깝습니다.</div>
+    </div>
+
+    <div class="section-label" style="margin:20px 0 10px;">이 POC로 이해할 경계</div>
+
+    <div class="pipe-io-grid">
+      <div class="pipe-io-card pipe-io-in">
+        <div class="pipe-io-label">DS 책임에 가까운 것</div>
+        <div class="pipe-io-title">모델 품질과 알고리즘 판단</div>
+        <ul class="pipe-io-list">
+          <li>어떤 feature가 추천 품질에 중요한지 판단</li>
+          <li>CBF/CF/Hybrid 중 어떤 모델을 쓸지 결정</li>
+          <li>offline metric으로 모델 개선 여부 설명</li>
+        </ul>
+      </div>
+      <div class="pipe-io-card pipe-io-work">
+        <div class="pipe-io-label">공동 계약</div>
+        <div class="pipe-io-title">운영 가능한 모델 산출물 기준</div>
+        <ul class="pipe-io-list">
+          <li>입력/출력 schema</li>
+          <li>artifact 형식과 저장 위치</li>
+          <li>검증 metric, fallback 기준, version 정보</li>
+        </ul>
+      </div>
+      <div class="pipe-io-card pipe-io-out">
+        <div class="pipe-io-label">개발팀 책임에 가까운 것</div>
+        <div class="pipe-io-title">서비스 운영과 서빙 안정성</div>
+        <ul class="pipe-io-list">
+          <li>추천 API, 배포, 모니터링, rollback</li>
+          <li>latency, 장애 대응, 권한/보안</li>
+          <li>계약을 만족한 artifact만 운영 인수</li>
+        </ul>
+      </div>
+      <div class="pipe-io-card pipe-io-use">
+        <div class="pipe-io-label">핵심 문장</div>
+        <div class="pipe-io-title">모델 소유권과 운영 인수는 다르다</div>
+        <p class="pipe-io-note">DS가 모델 로직을 소유하더라도, 개발팀이 책임질 수 있는 것은 운영 가능한 형태로 전달된 artifact입니다. 계약 없는 실험 결과는 바로 서비스 책임으로 넘어오지 않습니다.</p>
+      </div>
+    </div>
+
     <div class="section-label" style="margin:20px 0 10px;">직접 바꿔볼 지점</div>
 
     <div class="tune-card">
@@ -523,6 +605,6 @@ GET /health
   </button>
 </nav>
 
-<script src="js/app.js"></script>
+<script src="js/app.js?v=search-20260621"></script>
 </body>
 </html>

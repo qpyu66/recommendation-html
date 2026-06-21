@@ -5,6 +5,17 @@ let currentLesson = 0;
 let completedLessons = new Set();
 let quizAnswered = false;
 
+const LEARNING_AREAS = [
+  { label: '1단계 - 기초 개념', ids: [0, 1] },
+  { label: '2단계 - 데이터와 문제 정의', ids: [33] },
+  { label: '3단계 - 평가 지표', ids: [34, 2, 3, 32, 35] },
+  { label: '4단계 - 콘텐츠 기반', ids: [4, 5, 6, 7] },
+  { label: '5단계 - 협업 필터링', ids: [8, 9, 10, 11, 12, 13, 14, 15, 16] },
+  { label: '6단계 - 하이브리드 / 컨텍스트', ids: [17, 18, 19, 20] },
+  { label: '7단계 - 딥러닝 기반', ids: [21, 22, 23, 24, 25, 26] },
+  { label: '8단계 - 실서비스 & 멀티모달', ids: [27, 28, 29, 30, 31] }
+];
+
 function showScreen(name) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
@@ -12,6 +23,7 @@ function showScreen(name) {
   document.getElementById('nav-' + name).classList.add('active');
   if (name === 'learn') renderLesson(currentLesson);
   if (name === 'quiz') renderQuiz(currentLesson);
+  if (name === 'map') renderSearchResults(document.getElementById('lesson-search-input')?.value || '');
   if (name === 'pipeline') checkPipeApiStatus();
 }
 
@@ -180,6 +192,175 @@ function nextChapter() {
   }
 }
 
+function escapeHtml(value) {
+  return String(value ?? '')
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#039;');
+}
+
+function getLearningArea(lessonId) {
+  return LEARNING_AREAS.find(area => area.ids.includes(lessonId))?.label || '기타 학습 영역';
+}
+
+function normalizeSearchText(value) {
+  return String(value ?? '')
+    .normalize('NFKC')
+    .toLocaleLowerCase()
+    .replace(/[\s\-_/–—·.()[\]{}:;,'"!?@#$%^&*+=~`|\\<>]+/g, '');
+}
+
+function flattenSearchFields(value, prefix = '') {
+  if (value == null) return [];
+  if (typeof value === 'string' || typeof value === 'number') {
+    return [{ label: prefix || '내용', text: String(value) }];
+  }
+  if (Array.isArray(value)) {
+    return value.flatMap(item => flattenSearchFields(item, prefix));
+  }
+  if (typeof value === 'object') {
+    return Object.entries(value).flatMap(([key, child]) => {
+      const labelMap = {
+        title: '제목',
+        badgeText: '분류',
+        h: '핵심 개념',
+        p: '설명',
+        q: '퀴즈',
+        exp: '퀴즈 해설',
+        term: '용어',
+        meaning: '용어 설명',
+        use: '활용',
+        expression: '공식',
+        howToUse: '공식 사용법',
+        bridge: '연결 설명'
+      };
+      return flattenSearchFields(child, labelMap[key] || prefix);
+    });
+  }
+  return [];
+}
+
+function makeSnippet(text, keyword) {
+  const source = String(text);
+  const sourceLower = source.toLocaleLowerCase();
+  const keywordLower = keyword.toLocaleLowerCase();
+  let index = sourceLower.indexOf(keywordLower);
+  if (index < 0) {
+    const firstKeywordPart = keywordLower.split(/[\s\-_/–—·.()[\]{}:;,'"!?@#$%^&*+=~`|\\<>]+/).find(Boolean);
+    if (firstKeywordPart) index = sourceLower.indexOf(firstKeywordPart);
+  }
+  if (index < 0) return escapeHtml(source.slice(0, 110));
+  const start = Math.max(0, index - 42);
+  const end = Math.min(source.length, index + keyword.length + 70);
+  const before = escapeHtml((start > 0 ? '...' : '') + source.slice(start, index));
+  const match = escapeHtml(source.slice(index, Math.min(source.length, index + keyword.length)));
+  const after = escapeHtml(source.slice(index + keyword.length, end) + (end < source.length ? '...' : ''));
+  return `${before}<mark>${match}</mark>${after}`;
+}
+
+function buildLessonSearchRows(lesson, keyword) {
+  const notes = PRACTICAL_NOTES[lesson.id] || [];
+  const fields = [
+    ...flattenSearchFields({
+      title: lesson.title,
+      badgeText: lesson.badgeText,
+      concepts: lesson.concepts,
+      quiz: lesson.quiz,
+      deepDive: lesson.deepDive,
+      terms: lesson.terms,
+      formulas: lesson.formulas,
+      learningGoals: lesson.learningGoals,
+      prerequisites: lesson.prerequisites,
+      workedExample: lesson.workedExample,
+      missions: lesson.missions,
+      pitfalls: lesson.pitfalls,
+      bridge: lesson.bridge
+    }),
+    ...flattenSearchFields(notes, '실무 노트')
+  ];
+
+  return fields
+    .filter(field => normalizeSearchText(field.text).includes(normalizeSearchText(keyword)))
+    .slice(0, 3)
+    .map(field => ({
+      label: field.label,
+      snippet: makeSnippet(field.text, keyword)
+    }));
+}
+
+function renderSearchResults(rawKeyword = '') {
+  const resultBox = document.getElementById('search-results');
+  if (!resultBox) return;
+
+  const keyword = rawKeyword.trim();
+  if (!keyword) {
+    resultBox.innerHTML = `
+      <div class="search-empty">
+        찾고 싶은 단어를 입력하면 해당 단어가 들어 있는 학습 영역과 챕터가 표시됩니다.
+      </div>
+    `;
+    return;
+  }
+
+  if (!LESSONS.length) {
+    resultBox.innerHTML = '<div class="search-empty">학습 데이터를 아직 불러오지 못했습니다. 로컬 서버로 실행한 뒤 다시 검색해주세요.</div>';
+    return;
+  }
+
+  const matches = LESSONS
+    .map(lesson => ({ lesson, rows: buildLessonSearchRows(lesson, keyword) }))
+    .filter(result => result.rows.length);
+
+  if (!matches.length) {
+    resultBox.innerHTML = `<div class="search-empty">"${escapeHtml(keyword)}"가 포함된 학습 내용을 찾지 못했습니다.</div>`;
+    return;
+  }
+
+  const grouped = matches.reduce((acc, result) => {
+    const area = getLearningArea(result.lesson.id);
+    if (!acc[area]) acc[area] = [];
+    acc[area].push(result);
+    return acc;
+  }, {});
+
+  resultBox.innerHTML = Object.entries(grouped).map(([area, results]) => `
+    <div class="search-area">
+      <div class="search-area-title">${escapeHtml(area)} <span>${results.length}개 챕터</span></div>
+      <div class="search-result-list">
+        ${results.map(({ lesson, rows }) => {
+          const typeBadge = lesson.type ? `<span class="type-badge type-${lesson.type}">${TYPE_LABEL[lesson.type]}</span>` : '';
+          return `
+            <button class="search-result" onclick="goLesson(${lesson.id})">
+              <div class="search-result-head">
+                <div>
+                  <div class="search-result-title">${escapeHtml(lesson.ch)}. ${escapeHtml(lesson.title)}</div>
+                  <div class="search-result-meta">${escapeHtml(lesson.badgeText)} · ${escapeHtml(area)}</div>
+                </div>
+                ${typeBadge}
+              </div>
+              ${rows.map(row => `
+                <div class="search-match">
+                  <span>${escapeHtml(row.label)}</span>
+                  <p>${row.snippet}</p>
+                </div>
+              `).join('')}
+            </button>
+          `;
+        }).join('')}
+      </div>
+    </div>
+  `).join('');
+}
+
+function initSearch() {
+  const input = document.getElementById('lesson-search-input');
+  if (!input) return;
+  input.addEventListener('input', () => renderSearchResults(input.value));
+  renderSearchResults(input.value);
+}
+
 // ── 파이프라인 탭 ──
 let pipeItemProfiles = {};
 
@@ -295,6 +476,7 @@ async function initApp() {
     buildSelector("quiz-selector", (id) => { quizAnswered = false; renderQuiz(id); });
     renderLesson(0);
     renderQuiz(0);
+    initSearch();
     updateProgress();
   } catch (error) {
     document.getElementById("lesson-body").innerHTML = '<div class="card">학습 데이터를 불러오지 못했습니다. 로컬 서버로 실행해주세요.</div>';

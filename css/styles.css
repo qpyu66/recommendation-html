@@ -334,6 +334,125 @@
   .feedback.ok { background: var(--green-light); color: var(--green-dark); }
   .feedback.bad { background: #FCEBEB; color: #A32D2D; }
 
+  /* ── 검색 ── */
+  .search-panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 13px 14px;
+    margin-bottom: 14px;
+  }
+  .search-label {
+    display: block;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 8px;
+  }
+  .search-input {
+    width: 100%;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--bg);
+    color: var(--text);
+    font-family: inherit;
+    font-size: 14px;
+    line-height: 1.4;
+    padding: 11px 12px;
+    outline: none;
+  }
+  .search-input:focus { border-color: var(--green); }
+  .search-empty {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 22px 14px;
+    color: var(--text-hint);
+    font-size: 13px;
+    line-height: 1.6;
+    text-align: center;
+  }
+  .search-area { margin-bottom: 18px; }
+  .search-area-title {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 8px;
+    font-size: 12px;
+    font-weight: 800;
+    color: var(--text);
+    margin-bottom: 8px;
+  }
+  .search-area-title span {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-hint);
+    white-space: nowrap;
+  }
+  .search-result-list {
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+  }
+  .search-result {
+    width: 100%;
+    text-align: left;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--surface);
+    color: var(--text);
+    padding: 13px 14px;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .search-result:active { opacity: 0.75; }
+  .search-result-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 9px;
+  }
+  .search-result-title {
+    font-size: 14px;
+    font-weight: 800;
+    line-height: 1.45;
+    color: var(--text);
+  }
+  .search-result-meta {
+    font-size: 11px;
+    color: var(--text-hint);
+    margin-top: 2px;
+    line-height: 1.45;
+  }
+  .search-match {
+    border-top: 1px solid var(--border);
+    padding-top: 8px;
+    margin-top: 8px;
+  }
+  .search-match span {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 800;
+    color: var(--green-dark);
+    background: var(--green-light);
+    border-radius: 6px;
+    padding: 2px 7px;
+    margin-bottom: 5px;
+  }
+  .search-match p {
+    font-size: 12.5px;
+    color: var(--text-sub);
+    line-height: 1.65;
+  }
+  .search-match mark {
+    background: var(--amber-light);
+    color: var(--amber-dark);
+    border-radius: 3px;
+    padding: 0 2px;
+    font-weight: 700;
+  }
+
   /* ── AI 튜터 ── */
   .quick-qs { display: flex; flex-direction: column; gap: 7px; margin-bottom: 16px; }
   .quick-q-btn {
