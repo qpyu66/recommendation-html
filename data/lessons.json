@@ -122,6 +122,196 @@
     ]
   },
   {
+    "id": 33,
+    "ch": "Ch 02-1",
+    "title": "추천 데이터와 문제 정의",
+    "badge": "badge-intro",
+    "badgeText": "기초",
+    "learningGoals": [
+      "추천 문제를 평점 예측, Top-K 추천, 클릭/구매 예측으로 구분한다.",
+      "User, Item, Event 로그가 각각 어떤 역할을 하는지 설명한다.",
+      "데이터 누수 없이 학습/검증 데이터를 나누는 기준을 이해한다."
+    ],
+    "prerequisites": [
+      "사용자(User), 아이템(Item), 추천 점수(score)",
+      "명시적 피드백과 암묵적 피드백의 차이",
+      "시간 순서가 있는 로그 데이터"
+    ],
+    "bridge": "알고리즘을 배우기 전에 먼저 '무엇을 맞히는 문제인지'를 정해야 합니다. 같은 추천 시스템이라도 평점을 맞히는 문제와 홈 피드 Top-K를 고르는 문제는 데이터 구성과 평가 지표가 달라집니다.",
+    "concepts": [
+      {
+        "h": "추천 문제의 3가지 형태",
+        "p": "평점 예측은 사용자가 아이템에 줄 점수를 맞힌다. Top-K 추천은 사용자에게 보여줄 상위 K개 아이템을 고른다. 클릭/구매 예측은 후보 아이템에 대해 행동이 일어날 확률을 예측한다. 어떤 문제로 정의하느냐에 따라 모델, loss, metric이 달라진다."
+      },
+      {
+        "h": "User / Item / Event 테이블",
+        "p": "User는 사용자 속성, Item은 상품 속성, Event는 클릭·조회·구매·평점 같은 상호작용 로그다. 추천 학습의 핵심은 Event를 User-Item 관계로 변환하고, 필요한 경우 시간·위치·디바이스 같은 context를 함께 붙이는 것이다."
+      },
+      {
+        "h": "시간 기준 데이터 분할",
+        "p": "추천에서는 시간 순서를 지키는 train/test split이 중요하다. 미래 행동을 학습 데이터에 넣고 과거를 평가하면 데이터 누수가 생긴다. 실제 서비스는 과거 로그로 미래 행동을 예측하므로 검증도 같은 방향이어야 한다."
+      }
+    ],
+    "quiz": {
+      "q": "홈 화면에서 사용자에게 보여줄 상품 10개를 고르는 문제에 가장 가까운 정의는?",
+      "opts": [
+        "평점 예측 문제",
+        "Top-K 추천 문제",
+        "이미지 분류 문제",
+        "데이터 정규화 문제"
+      ],
+      "ans": 1,
+      "exp": "홈 피드는 제한된 슬롯에 상위 K개 아이템을 고르는 문제입니다. 따라서 RMSE보다 Precision@K, Recall@K, NDCG@K 같은 랭킹/Top-K 지표가 더 직접적입니다."
+    },
+    "type": "concept",
+    "deepDive": [
+      "명시적 피드백은 별점, 좋아요처럼 사용자가 의도를 직접 남긴 데이터입니다. 암묵적 피드백은 조회, 클릭, 체류, 장바구니, 구매처럼 행동에서 선호를 추정하는 데이터입니다.",
+      "암묵적 피드백에서 '클릭하지 않음'을 무조건 싫어함으로 해석하면 위험합니다. 사용자가 못 봤을 수도 있고, 노출 위치가 낮았을 수도 있기 때문입니다."
+    ],
+    "terms": [
+      {
+        "term": "Interaction",
+        "meaning": "사용자와 아이템 사이에 발생한 행동 기록입니다.",
+        "use": "조회, 클릭, 구매, 평점, 찜 같은 이벤트를 추천 학습 데이터로 바꿉니다."
+      },
+      {
+        "term": "Context",
+        "meaning": "행동이 발생한 주변 조건입니다.",
+        "use": "시간, 위치, 디바이스, 유입 경로, 날씨 같은 정보를 추천 점수에 반영합니다."
+      },
+      {
+        "term": "Data Leakage",
+        "meaning": "평가 시점에는 알 수 없는 미래 정보가 학습이나 피처에 섞이는 문제입니다.",
+        "use": "오프라인 성능은 높지만 실제 서비스 성능이 낮아지는 대표 원인입니다."
+      }
+    ],
+    "formulas": [
+      {
+        "name": "상호작용 로그",
+        "expression": "event = (user_id, item_id, event_type, timestamp, context)",
+        "howToUse": "추천 학습의 최소 단위입니다. 이 로그를 집계해 유저 프로필, 아이템 프로필, 학습 label을 만듭니다."
+      }
+    ],
+    "workedExample": {
+      "title": "클릭 로그를 Top-K 학습 데이터로 바꾸기",
+      "body": "u1이 i1, i2, i3을 봤고 i2만 클릭했다면 i2는 positive 후보가 되고, 노출됐지만 클릭되지 않은 i1/i3은 비교용 negative 후보가 될 수 있습니다.",
+      "steps": [
+        "노출 로그에서 사용자가 실제로 본 후보 목록을 만든다.",
+        "클릭/구매가 발생한 아이템을 positive로 표시한다.",
+        "같은 요청에서 노출됐지만 반응이 없던 아이템을 negative 후보로 둔다.",
+        "요청 시점 이후의 행동은 피처에 넣지 않는다."
+      ]
+    },
+    "missions": [
+      "현재 서비스라면 User, Item, Event 테이블에 어떤 컬럼이 필요할지 5개씩 적어보세요.",
+      "평점 예측, Top-K 추천, 클릭 예측 중 지금 만들고 싶은 기능이 어느 문제에 가까운지 분류해보세요."
+    ],
+    "pitfalls": [
+      "구매하지 않은 아이템을 모두 싫어한다고 보면 안 됩니다. 사용자가 그 아이템을 본 적이 없을 수 있습니다.",
+      "랜덤 split은 간단하지만 추천에서는 미래 행동이 과거 학습에 섞이는 누수를 만들 수 있습니다."
+    ]
+  },
+  {
+    "id": 34,
+    "ch": "Ch 03-1",
+    "title": "Top-K 추천 평가 — Precision@K / Recall@K / MAP / MRR",
+    "badge": "badge-eval",
+    "badgeText": "평가지표",
+    "learningGoals": [
+      "분류 지표 Precision/Recall과 추천 지표 Precision@K/Recall@K를 구분한다.",
+      "MAP과 MRR이 순위의 어느 부분을 중요하게 보는지 이해한다.",
+      "추천 화면 목적에 맞는 오프라인 지표를 고른다."
+    ],
+    "prerequisites": [
+      "Top-K 추천 리스트",
+      "Positive item과 relevance",
+      "train/test split"
+    ],
+    "bridge": "추천 화면은 보통 모든 아이템의 정답을 맞히는 문제가 아니라 제한된 슬롯 안에 좋은 아이템을 올리는 문제입니다. 그래서 @K가 붙은 지표로 '상위 K개 안에서 얼마나 잘 골랐는지'를 봅니다.",
+    "concepts": [
+      {
+        "h": "Precision@K와 Recall@K",
+        "p": "Precision@K는 추천한 K개 중 실제 relevant item 비율이다. Recall@K는 사용자가 실제로 좋아한 relevant item 중 추천 K개 안에 들어온 비율이다. K가 작을수록 첫 화면 품질에 가깝고, K가 커질수록 후보 회수 능력을 더 많이 본다."
+      },
+      {
+        "h": "MAP",
+        "p": "MAP(Mean Average Precision)은 relevant item이 상위에 나올수록 높은 점수를 주는 지표다. 여러 사용자별 Average Precision을 평균낸다. 관련 아이템이 여러 개 있는 검색/추천 결과 평가에 적합하다."
+      },
+      {
+        "h": "MRR",
+        "p": "MRR(Mean Reciprocal Rank)은 첫 번째 relevant item이 몇 등으로 나왔는지에 집중한다. 사용자가 첫 정답만 찾으면 되는 검색, FAQ, 단일 클릭 유도 화면에 유용하다."
+      }
+    ],
+    "quiz": {
+      "q": "추천한 10개 중 실제 구매한 상품이 2개라면 Precision@10은?",
+      "opts": [
+        "0.2",
+        "0.5",
+        "2.0",
+        "10.0"
+      ],
+      "ans": 0,
+      "exp": "Precision@K는 추천 K개 중 relevant item 비율입니다. 10개 중 2개가 맞았으므로 Precision@10 = 2 / 10 = 0.2입니다."
+    },
+    "type": "metric",
+    "deepDive": [
+      "Precision@K가 높다는 것은 노출 슬롯을 낭비하지 않는다는 뜻에 가깝습니다. Recall@K가 높다는 것은 사용자가 좋아할 만한 아이템을 넓게 회수했다는 뜻에 가깝습니다.",
+      "후보 생성 단계는 Recall@K를 더 중요하게 보고, 최종 랭킹 단계는 NDCG@K, MAP, CTR 같은 상위 순위 품질을 더 중요하게 볼 수 있습니다.",
+      "오프라인 지표는 실제 사용자 만족의 대리 지표입니다. 지표가 좋아져도 다양성, 피로도, 매출, 장기 유지율이 나빠질 수 있으므로 온라인 평가와 함께 봐야 합니다."
+    ],
+    "terms": [
+      {
+        "term": "@K",
+        "meaning": "상위 K개 추천 결과만 잘라 평가한다는 뜻입니다.",
+        "use": "홈 화면 10개 슬롯이면 Precision@10, NDCG@10처럼 봅니다."
+      },
+      {
+        "term": "Hit Rate",
+        "meaning": "추천 K개 안에 정답 아이템이 하나라도 들어왔는지 보는 지표입니다.",
+        "use": "정답이 하나인 다음 구매/다음 클릭 예측에서 간단히 사용합니다."
+      },
+      {
+        "term": "MRR",
+        "meaning": "첫 번째 정답의 순위 역수를 평균낸 지표입니다.",
+        "use": "첫 정답이 위에 있을수록 점수가 크게 올라갑니다."
+      }
+    ],
+    "formulas": [
+      {
+        "name": "Precision@K",
+        "expression": "Precision@K = (# of relevant recommended items in top K) / K",
+        "howToUse": "추천 슬롯 중 실제로 유효한 아이템 비율을 봅니다."
+      },
+      {
+        "name": "Recall@K",
+        "expression": "Recall@K = (# of relevant recommended items in top K) / (# of all relevant items)",
+        "howToUse": "사용자가 좋아할 아이템을 얼마나 놓치지 않았는지 봅니다."
+      },
+      {
+        "name": "MRR",
+        "expression": "MRR = mean(1 / rank_of_first_relevant_item)",
+        "howToUse": "첫 번째 정답이 얼마나 빨리 나오는지 평가합니다."
+      }
+    ],
+    "workedExample": {
+      "title": "Top-5 추천 리스트 계산",
+      "body": "추천 결과가 [A, B, C, D, E]이고 실제 relevant item이 {B, D, F}라면 top-5 안의 정답은 B와 D입니다.",
+      "steps": [
+        "Precision@5 = 2 / 5 = 0.4",
+        "Recall@5 = 2 / 3 = 0.667",
+        "첫 번째 정답 B는 2등이므로 Reciprocal Rank = 1 / 2 = 0.5"
+      ]
+    },
+    "missions": [
+      "임의의 추천 리스트 5개와 정답 아이템 집합을 만들고 Precision@5, Recall@5를 직접 계산해보세요.",
+      "홈 피드, 검색 결과, 다음 영상 추천 중 MRR이 가장 어울리는 화면을 골라 이유를 적어보세요."
+    ],
+    "pitfalls": [
+      "Precision/Recall과 Precision@K/Recall@K는 비슷해 보이지만 평가 대상이 다릅니다. 추천에서는 상위 K개 리스트가 기준입니다.",
+      "K 값을 바꾸면 지표도 달라집니다. 서비스 화면의 실제 슬롯 수와 맞춰 해석해야 합니다."
+    ]
+  },
+  {
     "id": 2,
     "ch": "Ch 03-2",
     "title": "추천시스템 평가 — RMSE",
@@ -249,9 +439,181 @@
     ]
   },
   {
+    "id": 32,
+    "ch": "Ch 03-4",
+    "title": "분류 성능 지표 — Precision / Recall / F1-score",
+    "badge": "badge-eval",
+    "badgeText": "평가지표",
+    "concepts": [
+      {
+        "h": "Confusion Matrix",
+        "p": "분류 모델의 예측 결과를 TP, FP, FN, TN으로 나눠 보는 표. TP는 실제 Positive를 Positive로 맞힌 경우, FP는 실제 Negative를 Positive로 잘못 예측한 경우, FN은 실제 Positive를 Negative로 놓친 경우, TN은 실제 Negative를 Negative로 맞힌 경우다."
+      },
+      {
+        "h": "Precision과 Recall",
+        "p": "Precision(정밀도)은 모델이 Positive라고 예측한 것 중 실제 Positive 비율이다. Recall(재현율)은 실제 Positive 중 모델이 찾아낸 비율이다. Precision은 오탐을 줄이는 데, Recall은 놓침을 줄이는 데 초점이 있다."
+      },
+      {
+        "h": "F1-score",
+        "p": "F1-score는 Precision과 Recall의 조화평균이다. 두 지표 중 하나만 높고 다른 하나가 낮으면 F1-score도 낮아진다. 클래스 불균형이 있거나 Positive를 얼마나 잘 찾는지가 중요한 문제에서 Accuracy보다 유용하다."
+      }
+    ],
+    "quiz": {
+      "q": "암 진단 모델처럼 실제 양성을 놓치는 것이 큰 문제인 경우 특히 중요하게 봐야 할 지표는?",
+      "opts": [
+        "Precision",
+        "Recall",
+        "RMSE",
+        "NDCG"
+      ],
+      "ans": 1,
+      "exp": "Recall은 실제 Positive 중 모델이 얼마나 많이 찾아냈는지를 봅니다. 실제 양성을 놓치는 FN을 줄이는 것이 중요할 때 우선적으로 확인합니다."
+    },
+    "type": "metric",
+    "deepDive": [
+      "Accuracy는 전체 정답률이라 직관적이지만 클래스가 불균형하면 착시가 생깁니다. 예를 들어 사기 거래가 1%인 데이터에서 전부 정상이라고 예측해도 Accuracy는 99%가 될 수 있습니다.",
+      "Precision과 Recall은 보통 trade-off 관계입니다. Positive 판정 기준을 엄격하게 잡으면 Precision은 올라가지만 Recall은 떨어질 수 있고, 기준을 느슨하게 잡으면 Recall은 올라가지만 Precision은 떨어질 수 있습니다.",
+      "추천 시스템에서도 클릭/구매 여부 예측, 스팸 리뷰 탐지, 사용자 세그먼트 분류처럼 분류 문제로 바뀌는 순간 Precision, Recall, F1-score를 함께 봐야 합니다."
+    ],
+    "terms": [
+      {
+        "term": "TP",
+        "meaning": "True Positive. 실제 Positive를 Positive로 맞힌 경우입니다.",
+        "use": "실제 구매할 사용자를 구매 가능성이 높다고 맞힌 경우입니다."
+      },
+      {
+        "term": "FP",
+        "meaning": "False Positive. 실제 Negative를 Positive로 잘못 예측한 경우입니다.",
+        "use": "구매하지 않을 사용자를 구매 가능성이 높다고 잘못 판단한 경우입니다."
+      },
+      {
+        "term": "FN",
+        "meaning": "False Negative. 실제 Positive를 Negative로 잘못 예측한 경우입니다.",
+        "use": "구매할 사용자를 놓쳐 추천이나 쿠폰 타겟에서 제외한 경우입니다."
+      },
+      {
+        "term": "Threshold",
+        "meaning": "모델 점수를 Positive로 판단할 기준값입니다.",
+        "use": "예측 확률이 0.5 이상이면 구매 가능성이 높다고 분류하는 식으로 사용합니다."
+      }
+    ],
+    "formulas": [
+      {
+        "name": "Precision",
+        "expression": "Precision = TP / (TP + FP)",
+        "howToUse": "Positive라고 예측한 대상 중 실제로 맞은 비율입니다. 잘못된 알림, 잘못된 차단, 불필요한 쿠폰 지급을 줄이고 싶을 때 중요합니다."
+      },
+      {
+        "name": "Recall",
+        "expression": "Recall = TP / (TP + FN)",
+        "howToUse": "실제 Positive 중 모델이 찾아낸 비율입니다. 사기 탐지, 이상 탐지, 이탈 위험 사용자 탐지처럼 놓치면 손실이 큰 문제에서 중요합니다."
+      },
+      {
+        "name": "F1-score",
+        "expression": "F1 = 2 * Precision * Recall / (Precision + Recall)",
+        "howToUse": "Precision과 Recall을 균형 있게 보고 싶을 때 사용합니다. 한쪽 지표만 높게 만드는 모델을 걸러낼 수 있습니다."
+      }
+    ]
+  },
+  {
+    "id": 35,
+    "ch": "Ch 03-5",
+    "title": "온라인 평가와 A/B 테스트",
+    "badge": "badge-eval",
+    "badgeText": "평가지표",
+    "learningGoals": [
+      "오프라인 지표와 온라인 지표의 차이를 설명한다.",
+      "CTR, CVR, 매출, 체류 시간, 재방문률을 추천 목표와 연결한다.",
+      "A/B 테스트에서 실험군, 대조군, 가드레일 지표를 구분한다."
+    ],
+    "prerequisites": [
+      "추천 로그와 노출 로그",
+      "NDCG, Precision@K 같은 오프라인 지표",
+      "사용자 행동 이벤트"
+    ],
+    "bridge": "오프라인 평가는 빠르게 모델 후보를 거르는 데 좋지만, 실제 사용자가 만족하는지는 서비스에서 확인해야 합니다. 온라인 평가는 추천 품질이 비즈니스와 사용자 경험에 어떤 영향을 주는지 봅니다.",
+    "concepts": [
+      {
+        "h": "오프라인 평가 vs 온라인 평가",
+        "p": "오프라인 평가는 과거 로그로 모델을 빠르게 비교한다. 온라인 평가는 실제 사용자 트래픽에서 CTR, CVR, 매출, 체류 시간, 재방문률 같은 지표 변화를 본다. 오프라인 지표가 좋아도 온라인 성과가 나빠질 수 있다."
+      },
+      {
+        "h": "A/B 테스트",
+        "p": "사용자를 대조군(A)과 실험군(B)으로 나누고 추천 로직만 다르게 적용해 결과를 비교한다. 랜덤 배정, 충분한 표본 수, 동일 기간 비교, 실험 중 설정 고정이 중요하다."
+      },
+      {
+        "h": "가드레일 지표",
+        "p": "주요 목표 지표가 좋아져도 사용자 경험이나 서비스 안정성이 나빠지면 실패한 실험일 수 있다. 예를 들어 CTR은 올랐지만 신고율, 이탈률, 로딩 시간, 다양성 지표가 나빠지는 경우를 함께 감시해야 한다."
+      }
+    ],
+    "quiz": {
+      "q": "A/B 테스트에서 CTR은 올랐지만 신고율과 이탈률도 함께 올랐다면 가장 적절한 판단은?",
+      "opts": [
+        "CTR이 올랐으므로 무조건 배포한다",
+        "가드레일 지표가 악화됐으므로 원인을 분석한다",
+        "오프라인 평가만 다시 계산한다",
+        "대조군을 삭제한다"
+      ],
+      "ans": 1,
+      "exp": "추천은 단일 지표만 보면 위험합니다. CTR이 올라도 신고율, 이탈률, 피로도 같은 가드레일 지표가 악화되면 사용자 경험이 나빠졌을 수 있습니다."
+    },
+    "type": "metric",
+    "deepDive": [
+      "추천 실험은 novelty 효과와 피로도 효과를 조심해야 합니다. 새 추천이 처음에는 클릭을 많이 만들 수 있지만 며칠 뒤 만족도가 떨어질 수 있습니다.",
+      "실험 단위도 중요합니다. 같은 사용자가 A와 B를 오가면 결과가 섞이므로 보통 user_id 기준으로 버킷을 고정합니다.",
+      "랭킹 모델은 매출만 최적화하면 고가 상품이나 프로모션 상품에 치우칠 수 있습니다. 다양성, 재고, 장기 유지율을 함께 보며 운영해야 합니다."
+    ],
+    "terms": [
+      {
+        "term": "CTR",
+        "meaning": "Click Through Rate. 노출 대비 클릭 비율입니다.",
+        "use": "추천 슬롯이 사용자의 관심을 끌었는지 확인합니다."
+      },
+      {
+        "term": "CVR",
+        "meaning": "Conversion Rate. 클릭이나 방문 대비 구매/가입 같은 전환 비율입니다.",
+        "use": "추천이 실제 행동으로 이어졌는지 봅니다."
+      },
+      {
+        "term": "Guardrail Metric",
+        "meaning": "목표 지표 외에 반드시 악화되면 안 되는 안전 지표입니다.",
+        "use": "이탈률, 신고율, 로딩 시간, 다양성, 환불률 등을 함께 감시합니다."
+      }
+    ],
+    "formulas": [
+      {
+        "name": "CTR",
+        "expression": "CTR = clicks / impressions",
+        "howToUse": "추천 아이템이 노출된 횟수 대비 클릭된 비율을 계산합니다."
+      },
+      {
+        "name": "CVR",
+        "expression": "CVR = conversions / clicks",
+        "howToUse": "추천 클릭 이후 구매, 가입, 재생 완료 같은 목표 행동이 발생한 비율을 봅니다."
+      }
+    ],
+    "workedExample": {
+      "title": "실험 결과 해석",
+      "body": "A안 CTR 4.0%, CVR 8.0%이고 B안 CTR 4.5%, CVR 6.5%라면 클릭은 늘었지만 전환 품질은 낮아졌을 수 있습니다.",
+      "steps": [
+        "B안이 더 자극적인 아이템을 상단에 올렸는지 확인한다.",
+        "매출, 환불률, 이탈률, 신고율 같은 가드레일 지표를 함께 본다.",
+        "짧은 기간의 클릭 상승만으로 전체 배포하지 않는다."
+      ]
+    },
+    "missions": [
+      "추천 화면 하나를 정하고 목표 지표 1개와 가드레일 지표 3개를 적어보세요.",
+      "CTR은 올랐지만 사용자 만족이 낮아질 수 있는 추천 사례를 하나 만들어보세요."
+    ],
+    "pitfalls": [
+      "오프라인 지표가 가장 높은 모델을 바로 배포하면 안 됩니다. 로그 편향과 실제 사용자 반응 차이가 있습니다.",
+      "CTR 하나만 최적화하면 자극적이거나 반복적인 아이템이 과도하게 올라갈 수 있습니다."
+    ]
+  },
+  {
     "id": 4,
     "ch": "Ch 04-1",
-    "title": "컨텐츠 기반 추천시스템",
+    "title": "콘텐츠 기반 추천시스템",
     "badge": "badge-content",
     "badgeText": "Content-based",
     "concepts": [
@@ -372,7 +734,7 @@
   },
   {
     "id": 6,
-    "ch": "Ch 04-4",
+    "ch": "Ch 04-3",
     "title": "나이브베이즈 추천알고리즘",
     "badge": "badge-content",
     "badgeText": "Content-based",
@@ -1301,6 +1663,11 @@
     "title": "Factorization Machine (FM)",
     "badge": "badge-deep",
     "badgeText": "Deep Learning",
+    "bridge": "MF는 user와 item의 상호작용을 잘 학습하지만, 시간·카테고리·브랜드·디바이스 같은 다양한 피처를 자연스럽게 넣기 어렵습니다. FM은 sparse feature 전체의 상호작용을 학습해 MF를 더 일반적인 형태로 확장합니다.",
+    "pitfalls": [
+      "FM은 모든 문제를 딥러닝으로 해결하는 모델이 아닙니다. sparse한 범주형 피처와 2차 상호작용이 중요한 CTR/랭킹 문제에서 특히 유용합니다.",
+      "피처 스케일과 인코딩 품질이 나쁘면 모델 구조가 좋아도 성능이 잘 나오지 않습니다."
+    ],
     "concepts": [
       {
         "h": "FM 개요",
@@ -1362,6 +1729,11 @@
     "title": "Wide & Deep Learning",
     "badge": "badge-deep",
     "badgeText": "Deep Learning",
+    "bridge": "FM은 자동 상호작용 학습에 강하지만, 과거에 검증된 명시적 규칙을 그대로 기억하는 데에는 별도 설계가 필요할 수 있습니다. Wide & Deep은 기억(Memorization)과 일반화(Generalization)를 한 모델 안에서 함께 노립니다.",
+    "pitfalls": [
+      "Wide 파트에 넣을 cross feature를 무작정 늘리면 관리 비용과 과적합 위험이 커집니다.",
+      "Deep 파트가 있다고 해서 피처 품질 문제가 사라지지는 않습니다. raw feature의 결측, 편향, 누수를 먼저 점검해야 합니다."
+    ],
     "concepts": [
       {
         "h": "Wide & Deep 개요",
@@ -1423,6 +1795,11 @@
     "title": "DeepFM",
     "badge": "badge-deep",
     "badgeText": "Deep Learning",
+    "bridge": "Wide & Deep은 wide 파트의 교차 피처를 사람이 설계해야 합니다. DeepFM은 wide 자리에 FM을 넣어 저차 상호작용을 자동으로 학습하고, DNN으로 고차 상호작용까지 함께 봅니다.",
+    "pitfalls": [
+      "DeepFM은 후보 생성보다는 수백 개 후보를 재정렬하는 랭킹 단계에 더 잘 맞습니다.",
+      "자동 feature interaction이 가능하더라도 잘못된 label, 누수 피처, 편향된 노출 로그는 그대로 성능 문제를 만듭니다."
+    ],
     "concepts": [
       {
         "h": "DeepFM 개요",
@@ -1484,6 +1861,11 @@
     "title": "AutoRec: AutoEncoders Meet CF",
     "badge": "badge-deep",
     "badgeText": "Deep Learning",
+    "bridge": "MF는 사용자-아이템 행렬을 낮은 차원으로 분해합니다. AutoRec은 AutoEncoder로 평점 벡터를 압축하고 복원하면서 비어 있는 칸을 예측해, 비선형 패턴까지 표현하려는 접근입니다.",
+    "pitfalls": [
+      "미관측 평점을 0점으로 학습하면 사용자가 싫어한 것으로 오해할 수 있습니다. 관측된 위치에만 loss를 계산하는 mask가 중요합니다.",
+      "평점 데이터가 적거나 implicit feedback 중심인 서비스에서는 AutoRec보다 BPR, implicit MF, 랭킹 모델이 더 적합할 수 있습니다."
+    ],
     "concepts": [
       {
         "h": "AutoRec 개요",
@@ -1545,6 +1927,11 @@
     "title": "Deep AutoEncoders for CF",
     "badge": "badge-deep",
     "badgeText": "Deep Learning",
+    "bridge": "AutoRec은 AutoEncoder를 추천에 적용하는 기본형입니다. Deep AutoEncoder는 층을 더 깊게 쌓아 복잡한 패턴을 학습하지만, 그만큼 과적합과 운영 비용을 함께 관리해야 합니다.",
+    "pitfalls": [
+      "층을 깊게 만드는 것만으로 추천 품질이 자동으로 좋아지지 않습니다. 검증 지표와 early stopping으로 실제 개선을 확인해야 합니다.",
+      "실시간 추론 비용이 큰 경우 배치로 추천 결과를 미리 계산하는 구조가 더 안정적일 수 있습니다."
+    ],
     "concepts": [
       {
         "h": "Deep AutoEncoder 개요",
@@ -1606,6 +1993,11 @@
     "title": "VAE for Collaborative Filtering",
     "badge": "badge-deep",
     "badgeText": "Deep Learning",
+    "bridge": "일반 AutoEncoder는 사용자의 취향을 하나의 고정 벡터로 압축합니다. VAE는 취향을 확률 분포로 표현해 불확실성과 다양성을 다루려는 모델입니다.",
+    "pitfalls": [
+      "다양성이 높아도 관련성이 낮으면 좋은 추천이 아닙니다. NDCG, Recall@K와 함께 diversity 지표를 같이 봐야 합니다.",
+      "KL 항의 비중이 너무 강하면 모든 사용자가 비슷한 잠재 표현으로 무너질 수 있어 annealing 같은 학습 조절이 필요합니다."
+    ],
     "concepts": [
       {
         "h": "VAE 개요",

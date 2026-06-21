@@ -19,7 +19,7 @@
     <div class="progress-track">
       <div class="progress-fill" id="prog-fill" style="width:0%"></div>
     </div>
-    <div class="progress-label" id="prog-label">0 / 32 챕터 완료</div>
+    <div class="progress-label" id="prog-label">0 / 36 챕터 완료</div>
   </div>
 </header>
 
@@ -42,23 +42,32 @@
       </div>
     </div>
     <div class="roadmap-section">
-      <div class="section-label">🟣 2단계 — 평가 지표</div>
+      <div class="section-label">🧱 2단계 — 데이터와 문제 정의</div>
       <div class="chip-row">
-        <button class="chip" onclick="goLesson(2)">Ch03-2 RMSE</button>
-        <button class="chip" onclick="goLesson(3)">Ch03-3 NDCG</button>
+        <button class="chip" onclick="goLesson(33)">Ch02-1 추천 데이터와 문제 정의</button>
       </div>
     </div>
     <div class="roadmap-section">
-      <div class="section-label">🟠 3단계 — 컨텐츠 기반</div>
+      <div class="section-label">🟣 3단계 — 평가 지표</div>
       <div class="chip-row">
-        <button class="chip" onclick="goLesson(4)">Ch04-1 컨텐츠기반 필터링</button>
+        <button class="chip" onclick="goLesson(34)">Ch03-1 Top-K 추천 평가</button>
+        <button class="chip" onclick="goLesson(2)">Ch03-2 RMSE</button>
+        <button class="chip" onclick="goLesson(3)">Ch03-3 NDCG</button>
+        <button class="chip" onclick="goLesson(32)">Ch03-4 분류 성능 지표</button>
+        <button class="chip" onclick="goLesson(35)">Ch03-5 온라인 평가</button>
+      </div>
+    </div>
+    <div class="roadmap-section">
+      <div class="section-label">🟠 4단계 — 콘텐츠 기반</div>
+      <div class="chip-row">
+        <button class="chip" onclick="goLesson(4)">Ch04-1 콘텐츠 기반 필터링</button>
         <button class="chip" onclick="goLesson(5)">Ch04-4 근접이웃</button>
-        <button class="chip" onclick="goLesson(6)">Ch04-4 나이브베이즈</button>
+        <button class="chip" onclick="goLesson(6)">Ch04-3 나이브베이즈</button>
         <button class="chip" onclick="goLesson(7)">Ch04-5 TF-IDF</button>
       </div>
     </div>
     <div class="roadmap-section">
-      <div class="section-label">🔵 4단계 — 협업 필터링</div>
+      <div class="section-label">🔵 5단계 — 협업 필터링</div>
       <div class="chip-row">
         <button class="chip" onclick="goLesson(8)">Ch05-1 이웃기반 CF</button>
         <button class="chip" onclick="goLesson(9)">Ch05-2 User/Item-based</button>
@@ -72,7 +81,7 @@
       </div>
     </div>
     <div class="roadmap-section">
-      <div class="section-label">🟡 5단계 — 하이브리드 / 컨텍스트</div>
+      <div class="section-label">🟡 6단계 — 하이브리드 / 컨텍스트</div>
       <div class="chip-row">
         <button class="chip" onclick="goLesson(17)">Ch07-1 Hybrid</button>
         <button class="chip" onclick="goLesson(18)">Ch07-2 Context-Aware</button>
@@ -81,7 +90,7 @@
       </div>
     </div>
     <div class="roadmap-section">
-      <div class="section-label">🩷 6단계 — 딥러닝 기반</div>
+      <div class="section-label">🩷 7단계 — 딥러닝 기반</div>
       <div class="chip-row">
         <button class="chip" onclick="goLesson(21)">Ch08-4 Factorization Machine</button>
         <button class="chip" onclick="goLesson(22)">Ch08-7 Wide & Deep</button>
@@ -92,7 +101,7 @@
       </div>
     </div>
     <div class="roadmap-section">
-      <div class="section-label">🌿 7단계 — 실서비스 & 멀티모달</div>
+      <div class="section-label">🌿 8단계 — 실서비스 & 멀티모달</div>
       <div class="chip-row">
         <button class="chip" onclick="goLesson(27)">Ch09-1 텍스트 리뷰 기반</button>
         <button class="chip" onclick="goLesson(28)">Ch09-3 이미지 기반</button>
@@ -115,30 +124,385 @@
     <div id="quiz-body"></div>
   </div>
 
-  <!-- ④ AI 튜터 화면 -->
-  <div class="screen" id="screen-ai">
-    <p style="font-size:13px;color:var(--text-sub);margin-bottom:12px;">현재 챕터에 대해 AI 튜터에게 질문하세요.</p>
-    <div class="quick-qs">
-      <button class="quick-q-btn" onclick="askAI('추천시스템에서 Collaborative Filtering과 Content-based Filtering의 핵심 차이를 실무 예시로 설명해줘')">💡 CF vs Content-based 차이 →</button>
-      <button class="quick-q-btn" onclick="askAI('Matrix Factorization의 Latent Factor가 무엇인지, 커머스에서 어떻게 해석할 수 있는지 설명해줘')">💡 MF Latent Factor 의미 →</button>
-      <button class="quick-q-btn" onclick="askAI('NDCG와 RMSE를 추천시스템 평가에 사용할 때 각각 어떤 상황에 더 적합한지 알려줘')">💡 NDCG vs RMSE 비교 →</button>
-      <button class="quick-q-btn" onclick="askAI('Implicit Feedback과 Explicit Feedback의 차이와 커머스 플랫폼 예시를 들어줘')">💡 Implicit / Explicit 피드백 →</button>
-      <button class="quick-q-btn" onclick="askAI('Wide & Deep과 DeepFM 모델의 차이점과 각각 어떤 상황에 적합한지 설명해줘')">💡 Wide&Deep vs DeepFM →</button>
-      <button class="quick-q-btn" onclick="askAI('YouTube 추천시스템의 surrogate problem이 무엇인지, 실무에서 어떻게 대응하는지 설명해줘')">💡 YouTube surrogate problem →</button>
+  <!-- ④ 파이프라인 화면 -->
+  <div class="screen" id="screen-pipeline">
+
+    <div class="pipe-status-bar">
+      <span class="pipe-status-dot" id="pipe-status-dot"></span>
+      <span class="pipe-status-text" id="pipe-status-text">서버 상태 확인 중...</span>
+      <code class="pipe-status-cmd">python3 -m src.serve</code>
     </div>
-    <div class="chat-box">
-      <div class="chat-header">
-        <div class="chat-dot"></div>
-        AI 튜터
+
+    <div class="section-label" style="margin-bottom:10px;">전체 흐름</div>
+    <div class="pipe-flow">
+
+      <div class="pipe-step" onclick="togglePipeStep(0)">
+        <div class="pipe-step-header">
+          <span class="pipe-step-icon">📦</span>
+          <div class="pipe-step-info">
+            <div class="pipe-step-title">원시 데이터 수집</div>
+            <div class="pipe-step-sub">IN: 서비스 로그/카탈로그 → OUT: 정규화된 이벤트 테이블</div>
+          </div>
+          <span class="pipe-step-chevron">›</span>
+        </div>
+        <div class="pipe-step-detail">
+          <div class="pipe-step-detail-inner">
+            <p class="pipe-detail-desc">추천 시스템의 입력은 3가지 데이터입니다. 이벤트 로그에서 어떤 행동을 얼마나 강한 선호 신호로 볼지 가중치를 정의하는 것이 출발점입니다.</p>
+            <div class="pipe-io-grid">
+              <div class="pipe-io-card pipe-io-in">
+                <div class="pipe-io-label">IN</div>
+                <div class="pipe-io-title">서비스에서 쌓인 원본 데이터</div>
+                <ul class="pipe-io-list">
+                  <li><code>events.csv</code>: 누가, 무엇을, 언제, 어떻게 반응했는지</li>
+                  <li><code>users.csv</code>: 유저 식별자와 기본 속성</li>
+                  <li><code>items.csv</code>: 상품의 카테고리, 브랜드, 태그, 가격</li>
+                </ul>
+              </div>
+              <div class="pipe-io-card pipe-io-work">
+                <div class="pipe-io-label">처리</div>
+                <div class="pipe-io-title">추천에 필요한 신호만 남김</div>
+                <ul class="pipe-io-list">
+                  <li>행동 종류를 <code>view</code>, <code>click</code>, <code>purchase</code>로 구분</li>
+                  <li>행동별 중요도를 <code>EVENT_WEIGHTS</code>로 정의</li>
+                  <li>최근 행동은 크게, 오래된 행동은 작게 보도록 기준 설정</li>
+                </ul>
+              </div>
+              <div class="pipe-io-card pipe-io-out">
+                <div class="pipe-io-label">OUT</div>
+                <div class="pipe-io-title">모델이 읽을 수 있는 이벤트 테이블</div>
+                <ul class="pipe-io-list">
+                  <li><code>user_id</code>, <code>item_id</code>, <code>event_type</code>, <code>timestamp</code></li>
+                  <li>각 이벤트가 선호 신호인지 계산할 준비 완료</li>
+                </ul>
+              </div>
+              <div class="pipe-io-card pipe-io-use">
+                <div class="pipe-io-label">다음 사용처</div>
+                <div class="pipe-io-title">피처 엔지니어링</div>
+                <p class="pipe-io-note">다음 단계에서 이벤트마다 점수를 만들고, 유저별 선호 프로필로 집계합니다.</p>
+              </div>
+            </div>
+            <pre class="pipe-code"># events.csv
+user_id,item_id,event_type,timestamp
+u1,i1,view,2026-06-01T09:00:00
+u1,i1,click,2026-06-01T09:01:00
+
+# config.py
+EVENT_WEIGHTS = {
+    "view":     1.0,  # 봤다
+    "click":    3.0,  # 관심 있다
+    "purchase": 8.0,  # 강한 선호
+}
+TIME_DECAY_HALF_LIFE_DAYS = 14</pre>
+          </div>
+        </div>
       </div>
-      <div class="chat-messages" id="ai-msgs">
-        <div class="msg-ai">안녕하세요! 추천 시스템 학습을 도와드릴 AI 튜터입니다. 위의 빠른 질문을 누르거나 아래에 직접 입력해보세요 😊</div>
+
+      <div class="pipe-arrow">↓</div>
+
+      <div class="pipe-step" onclick="togglePipeStep(1)">
+        <div class="pipe-step-header">
+          <span class="pipe-step-icon">⚙️</span>
+          <div class="pipe-step-info">
+            <div class="pipe-step-title">피처 엔지니어링</div>
+            <div class="pipe-step-sub">IN: 이벤트 테이블 → OUT: 유저/아이템 피처 프로필</div>
+          </div>
+          <span class="pipe-step-chevron">›</span>
+        </div>
+        <div class="pipe-step-detail">
+          <div class="pipe-step-detail-inner">
+            <p class="pipe-detail-desc">원시 이벤트를 유저 선호 프로필로 변환합니다. 행동 가중치 × 시간에 따른 영향 감소로 각 이벤트의 신호 강도를 계산하고, 이를 카테고리·브랜드·태그·가격대 선호로 집계합니다.</p>
+            <div class="pipe-io-grid">
+              <div class="pipe-io-card pipe-io-in">
+                <div class="pipe-io-label">IN</div>
+                <div class="pipe-io-title">정규화된 이벤트 + 상품 메타데이터</div>
+                <ul class="pipe-io-list">
+                  <li><code>event_type</code>: 행동 강도 계산에 사용</li>
+                  <li><code>timestamp</code>: 오래된 행동의 영향 감소에 사용</li>
+                  <li><code>items.csv</code>: 카테고리, 브랜드, 태그, 가격 매핑</li>
+                </ul>
+              </div>
+              <div class="pipe-io-card pipe-io-work">
+                <div class="pipe-io-label">처리</div>
+                <div class="pipe-io-title">행동을 숫자 피처로 변환</div>
+                <ul class="pipe-io-list">
+                  <li><code>행동 가중치 × 최근성 점수</code>로 이벤트 강도 산출</li>
+                  <li>유저가 반응한 상품 속성을 누적</li>
+                  <li>카테고리, 브랜드, 태그, 가격대를 정규화</li>
+                </ul>
+              </div>
+              <div class="pipe-io-card pipe-io-out">
+                <div class="pipe-io-label">OUT</div>
+                <div class="pipe-io-title">유저 선호 프로필</div>
+                <ul class="pipe-io-list">
+                  <li><code>categories</code>: 선호 카테고리 분포</li>
+                  <li><code>brands</code>, <code>tags</code>: 선호 속성 분포</li>
+                  <li><code>price_norm</code>: 선호 가격대</li>
+                </ul>
+              </div>
+              <div class="pipe-io-card pipe-io-use">
+                <div class="pipe-io-label">다음 사용처</div>
+                <div class="pipe-io-title">CBF/CF/Hybrid 모델 추론</div>
+                <p class="pipe-io-note">CBF는 유저 프로필과 아이템 프로필의 유사도를 계산하고, CF는 유저 행동 벡터를 비교합니다.</p>
+              </div>
+            </div>
+            <pre class="pipe-code"># features.py
+def event_strength(event, reference_time):
+    base  = EVENT_WEIGHTS[event["event_type"]]
+    days  = (reference_time - event["timestamp"]).days
+    decay = 0.5 ** (days / TIME_DECAY_HALF_LIFE_DAYS)
+    return base * decay
+
+# 결과: 유저 선호 프로필
+{
+  "categories": {"shoes": 0.71, "shirt": 0.29},
+  "brands":     {"nike": 0.62, "adidas": 0.38},
+  "tags":       {"running": 0.48, "casual": 0.31},
+  "price_norm": 0.42
+}</pre>
+          </div>
+        </div>
       </div>
-      <div class="chat-input-row">
-        <input type="text" id="ai-input" placeholder="질문 입력..." onkeydown="if(event.key==='Enter')sendAI()" />
-        <button class="send-btn" onclick="sendAI()">↑</button>
+
+      <div class="pipe-arrow">↓</div>
+
+      <div class="pipe-step" onclick="togglePipeStep(2)">
+        <div class="pipe-step-header">
+          <span class="pipe-step-icon">🧠</span>
+          <div class="pipe-step-info">
+            <div class="pipe-step-title">모델 추론</div>
+            <div class="pipe-step-sub">IN: 피처 프로필/행동 벡터 → OUT: item별 추천 점수</div>
+          </div>
+          <span class="pipe-step-chevron">›</span>
+        </div>
+        <div class="pipe-step-detail">
+          <div class="pipe-step-detail-inner">
+            <p class="pipe-detail-desc">CBF는 아이템 메타데이터 유사도로, CF는 비슷한 유저의 행동으로 후보를 생성합니다. Hybrid는 두 점수를 가중합산합니다.</p>
+            <div class="pipe-io-grid">
+              <div class="pipe-io-card pipe-io-in">
+                <div class="pipe-io-label">IN</div>
+                <div class="pipe-io-title">모델별로 필요한 피처</div>
+                <ul class="pipe-io-list">
+                  <li><code>CBF</code>: 유저 프로필 + 아이템 프로필</li>
+                  <li><code>CF</code>: 유저-아이템 행동 행렬</li>
+                  <li><code>Hybrid</code>: CBF 점수 + CF 점수</li>
+                </ul>
+              </div>
+              <div class="pipe-io-card pipe-io-work">
+                <div class="pipe-io-label">처리</div>
+                <div class="pipe-io-title">후보 아이템에 점수 부여</div>
+                <ul class="pipe-io-list">
+                  <li>CBF: 속성 유사도를 가중합산</li>
+                  <li>CF: 비슷한 유저가 좋아한 아이템을 찾음</li>
+                  <li>Hybrid: 두 점수를 하나의 최종 점수로 합침</li>
+                </ul>
+              </div>
+              <div class="pipe-io-card pipe-io-out">
+                <div class="pipe-io-label">OUT</div>
+                <div class="pipe-io-title">추천 후보 리스트</div>
+                <ul class="pipe-io-list">
+                  <li><code>item_id</code>: 추천할 상품</li>
+                  <li><code>score</code>: 높을수록 우선 노출</li>
+                  <li><code>model</code>: cbf, cf, hybrid 중 어떤 방식인지</li>
+                </ul>
+              </div>
+              <div class="pipe-io-card pipe-io-use">
+                <div class="pipe-io-label">다음 사용처</div>
+                <div class="pipe-io-title">아티팩트 저장</div>
+                <p class="pipe-io-note">유저와 모델별 추천 리스트를 JSON으로 저장해 API가 빠르게 읽을 수 있게 합니다.</p>
+              </div>
+            </div>
+            <pre class="pipe-code"># CBF (models/cbf.py) — 메타데이터 유사도
+score = (0.35 * category_score
+       + 0.15 * brand_score
+       + 0.35 * tag_score
+       + 0.15 * price_score)
+
+# CF (models/cf.py) — 비슷한 유저 행동 기반
+similarity = cosine_similarity(
+    my_vector, neighbor_vector
+)
+
+# Hybrid (models/hybrid.py)
+CBF_WEIGHT, CF_WEIGHT = 0.55, 0.45
+final = CBF_WEIGHT * cbf_score \
+      + CF_WEIGHT  * cf_score</pre>
+          </div>
+        </div>
       </div>
+
+      <div class="pipe-arrow">↓</div>
+
+      <div class="pipe-step" onclick="togglePipeStep(3)">
+        <div class="pipe-step-header">
+          <span class="pipe-step-icon">🔄</span>
+          <div class="pipe-step-info">
+            <div class="pipe-step-title">파이프라인 실행 · 아티팩트 저장</div>
+            <div class="pipe-step-sub">IN: 추천 결과/프로필 → OUT: artifacts/*.json</div>
+          </div>
+          <span class="pipe-step-chevron">›</span>
+        </div>
+        <div class="pipe-step-detail">
+          <div class="pipe-step-detail-inner">
+            <p class="pipe-detail-desc">pipeline.py를 실행하면 모든 유저 × 모든 모델의 추천 결과가 미리 계산되어 JSON으로 저장됩니다. 서빙 시 실시간 추론 없이 이 파일을 즉시 읽어 응답합니다.</p>
+            <div class="pipe-io-grid">
+              <div class="pipe-io-card pipe-io-in">
+                <div class="pipe-io-label">IN</div>
+                <div class="pipe-io-title">배치 계산 결과</div>
+                <ul class="pipe-io-list">
+                  <li>유저별 선호 프로필</li>
+                  <li>아이템별 피처 프로필</li>
+                  <li>모델별 추천 후보와 점수</li>
+                </ul>
+              </div>
+              <div class="pipe-io-card pipe-io-work">
+                <div class="pipe-io-label">처리</div>
+                <div class="pipe-io-title">서빙용 파일로 고정</div>
+                <ul class="pipe-io-list">
+                  <li>모든 유저 × 모델 조합을 미리 계산</li>
+                  <li>API가 읽기 쉬운 JSON 구조로 저장</li>
+                  <li>추천이 부족할 때 쓸 인기 아이템도 준비</li>
+                </ul>
+              </div>
+              <div class="pipe-io-card pipe-io-out">
+                <div class="pipe-io-label">OUT</div>
+                <div class="pipe-io-title">아티팩트 파일</div>
+                <ul class="pipe-io-list">
+                  <li><code>recommendations.json</code>: 최종 추천 리스트</li>
+                  <li><code>user_profiles.json</code>, <code>item_profiles.json</code>: 설명/디버깅용 프로필</li>
+                  <li><code>popular_items.json</code>: fallback용 인기 상품</li>
+                </ul>
+              </div>
+              <div class="pipe-io-card pipe-io-use">
+                <div class="pipe-io-label">다음 사용처</div>
+                <div class="pipe-io-title">서빙 API</div>
+                <p class="pipe-io-note">API 서버가 이 파일들을 메모리에 올린 뒤 요청마다 조회만 수행합니다.</p>
+              </div>
+            </div>
+            <pre class="pipe-code"># 실행
+python3 -m src.pipeline
+
+# 생성 파일
+artifacts/
+  recommendations.json  # {cbf/cf/hybrid: {u1: [...]}}
+  user_profiles.json    # 유저별 선호 프로필
+  item_profiles.json    # 아이템별 피처
+  popular_items.json    # fallback용 인기 아이템</pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="pipe-arrow">↓</div>
+
+      <div class="pipe-step" onclick="togglePipeStep(4)">
+        <div class="pipe-step-header">
+          <span class="pipe-step-icon">🚀</span>
+          <div class="pipe-step-info">
+            <div class="pipe-step-title">서빙 API</div>
+            <div class="pipe-step-sub">IN: user_id/model/k 요청 → OUT: 추천 API 응답</div>
+          </div>
+          <span class="pipe-step-chevron">›</span>
+        </div>
+        <div class="pipe-step-detail">
+          <div class="pipe-step-detail-inner">
+            <p class="pipe-detail-desc">serve.py는 아티팩트를 메모리에 로드하고 요청마다 즉시 조회합니다. 결과가 k개 미만이면 인기 아이템으로 자동 fallback합니다.</p>
+            <div class="pipe-io-grid">
+              <div class="pipe-io-card pipe-io-in">
+                <div class="pipe-io-label">IN</div>
+                <div class="pipe-io-title">클라이언트 요청</div>
+                <ul class="pipe-io-list">
+                  <li><code>user_id</code>: 추천을 받을 유저</li>
+                  <li><code>model</code>: cbf, cf, hybrid 중 선택</li>
+                  <li><code>k</code>: 몇 개를 받을지</li>
+                </ul>
+              </div>
+              <div class="pipe-io-card pipe-io-work">
+                <div class="pipe-io-label">처리</div>
+                <div class="pipe-io-title">미리 만든 결과 조회</div>
+                <ul class="pipe-io-list">
+                  <li><code>recommendations.json</code>에서 유저/모델 키 조회</li>
+                  <li>요청한 개수만큼 잘라서 반환</li>
+                  <li>결과가 부족하면 인기 아이템으로 채움</li>
+                </ul>
+              </div>
+              <div class="pipe-io-card pipe-io-out">
+                <div class="pipe-io-label">OUT</div>
+                <div class="pipe-io-title">화면에서 바로 쓸 응답</div>
+                <ul class="pipe-io-list">
+                  <li><code>items[]</code>: item_id와 score 목록</li>
+                  <li><code>fallback_used</code>: fallback 사용 여부</li>
+                  <li><code>model</code>: 어떤 추천 로직의 결과인지</li>
+                </ul>
+              </div>
+              <div class="pipe-io-card pipe-io-use">
+                <div class="pipe-io-label">사용처</div>
+                <div class="pipe-io-title">앱 화면/추천 위젯</div>
+                <p class="pipe-io-note">라이브 데모 영역은 이 API를 호출해 추천 상품 ID와 점수를 렌더링합니다.</p>
+              </div>
+            </div>
+            <pre class="pipe-code"># 엔드포인트
+GET /recommendations?user_id=u1&model=hybrid&k=5
+GET /similar-items?item_id=i1&k=5
+GET /health
+
+# 응답 예시
+{
+  "user_id": "u1",
+  "model": "hybrid",
+  "fallback_used": false,
+  "items": [
+    {"item_id": "i7", "score": 0.831},
+    {"item_id": "i3", "score": 0.762}
+  ]
+}</pre>
+          </div>
+        </div>
+      </div>
+
     </div>
+
+    <div class="section-label" style="margin:20px 0 10px;">직접 바꿔볼 지점</div>
+
+    <div class="tune-card">
+      <div class="tune-card-file">src/config.py · EVENT_WEIGHTS</div>
+      <div class="tune-card-title">행동별 가중치 조정</div>
+      <div class="tune-card-desc">purchase 값을 낮추면 구매 이력만 반복 추천되는 쏠림이 줄어듭니다. 반대로 높이면 구매 경험이 훨씬 강하게 반영됩니다.</div>
+    </div>
+
+    <div class="tune-card">
+      <div class="tune-card-file">src/config.py · TIME_DECAY_HALF_LIFE_DAYS</div>
+      <div class="tune-card-title">시간에 따른 영향 감소 기간 변경</div>
+      <div class="tune-card-desc">7로 줄이면 오래된 행동의 영향이 더 빨리 작아집니다. 트렌드가 빠른 서비스일수록 짧게 설정합니다.</div>
+    </div>
+
+    <div class="tune-card">
+      <div class="tune-card-file">src/models/hybrid.py · CBF_WEIGHT / CF_WEIGHT</div>
+      <div class="tune-card-title">모델 비율 조정</div>
+      <div class="tune-card-desc">신규 유저가 많다면 CBF_WEIGHT를 높이세요. 행동 데이터가 풍부하다면 CF_WEIGHT를 높이세요. 둘의 합은 1.0을 유지합니다.</div>
+    </div>
+
+    <div class="section-label" style="margin:20px 0 10px;">라이브 데모</div>
+
+    <div class="demo-controls">
+      <select class="demo-select" id="demo-user-select">
+        <option value="u1">유저 u1</option>
+        <option value="u2">유저 u2</option>
+        <option value="u3">유저 u3</option>
+        <option value="u4">유저 u4</option>
+      </select>
+      <select class="demo-select" id="demo-model-select">
+        <option value="hybrid">Hybrid</option>
+        <option value="cbf">CBF</option>
+        <option value="cf">CF</option>
+      </select>
+      <button class="demo-run-btn" id="demo-run-btn" onclick="runDemo()" disabled>추천 받기</button>
+    </div>
+
+    <div class="demo-result-box" id="demo-result-box">
+      <div class="demo-empty">서버를 실행한 뒤 추천 받기를 눌러보세요.</div>
+    </div>
+
+    <div style="height:8px;"></div>
+
   </div>
 
 </main>
@@ -154,8 +518,8 @@
   <button class="nav-item" id="nav-quiz" onclick="showScreen('quiz')">
     <span class="nav-icon">✏️</span>퀴즈
   </button>
-  <button class="nav-item" id="nav-ai" onclick="showScreen('ai')">
-    <span class="nav-icon">🤖</span>AI 튜터
+  <button class="nav-item" id="nav-pipeline" onclick="showScreen('pipeline')">
+    <span class="nav-icon">⚙️</span>파이프라인
   </button>
 </nav>
 

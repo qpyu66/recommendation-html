@@ -12,6 +12,7 @@ function showScreen(name) {
   document.getElementById('nav-' + name).classList.add('active');
   if (name === 'learn') renderLesson(currentLesson);
   if (name === 'quiz') renderQuiz(currentLesson);
+  if (name === 'pipeline') checkPipeApiStatus();
 }
 
 function getLessonData(idx) {
@@ -56,6 +57,12 @@ function renderLesson(idx) {
   const deepDive = l.deepDive || [];
   const terms = l.terms || [];
   const formulas = l.formulas || [];
+  const learningGoals = l.learningGoals || [];
+  const prerequisites = l.prerequisites || [];
+  const workedExample = l.workedExample || null;
+  const missions = l.missions || [];
+  const pitfalls = l.pitfalls || [];
+  const bridge = l.bridge || '';
   buildSelector('ch-selector', goLesson);
   const done = completedLessons.has(idx);
   const typeBadge = l.type ? `<span class="type-badge type-${l.type}">${TYPE_LABEL[l.type]}</span>` : '';
@@ -69,11 +76,19 @@ function renderLesson(idx) {
     <div class="lesson-meta">
       <span>${l.concepts.length}개 핵심 개념 · ${notes.length}개 실무 노트</span>
     </div>
+    ${bridge ? `<div class="learning-bridge">${bridge}</div>` : ''}
+    ${learningGoals.length || prerequisites.length ? `<div class="learning-guide-grid">
+      ${learningGoals.length ? `<div class="learning-guide"><h3>학습 목표</h3><ul>${learningGoals.map(item => `<li>${item}</li>`).join('')}</ul></div>` : ''}
+      ${prerequisites.length ? `<div class="learning-guide"><h3>먼저 알면 좋은 것</h3><ul>${prerequisites.map(item => `<li>${item}</li>`).join('')}</ul></div>` : ''}
+    </div>` : ''}
     <div class="section-label" style="margin-top:4px;margin-bottom:8px;">📚 핵심 개념</div>
     ${l.concepts.map(c => `<div class="concept"><h3>${c.h}</h3><p>${c.p}</p></div>`).join('')}
     ${deepDive.length ? `<div class="section-label" style="margin-top:16px;margin-bottom:8px;">🔎 심화 설명</div><div class="deep-list">${deepDive.map(item => `<div class="deep-item">${item}</div>`).join('')}</div>` : ''}
     ${terms.length ? `<div class="section-label" style="margin-top:16px;margin-bottom:8px;">🧩 처음 보는 용어</div><div class="term-list">${terms.map(t => `<div class="term-item"><h3>${t.term}</h3><p>${t.meaning}</p><p class="term-use">${t.use}</p></div>`).join('')}</div>` : ''}
     ${formulas.length ? `<div class="section-label" style="margin-top:16px;margin-bottom:8px;">∑ 공식과 사용법</div><div class="formula-list">${formulas.map(f => `<div class="formula-item"><h3>${f.name}</h3><code>${f.expression}</code><p>${f.howToUse}</p></div>`).join('')}</div>` : ''}
+    ${workedExample ? `<div class="section-label" style="margin-top:16px;margin-bottom:8px;">🧮 손계산 예제</div><div class="worked-example"><h3>${workedExample.title}</h3><p>${workedExample.body}</p>${workedExample.steps ? `<ol>${workedExample.steps.map(step => `<li>${step}</li>`).join('')}</ol>` : ''}</div>` : ''}
+    ${missions.length ? `<div class="section-label" style="margin-top:16px;margin-bottom:8px;">🛠️ 실습 미션</div><div class="mission-list">${missions.map(item => `<div class="mission-item">${item}</div>`).join('')}</div>` : ''}
+    ${pitfalls.length ? `<div class="section-label" style="margin-top:16px;margin-bottom:8px;">⚠️ 흔한 오해</div><div class="pitfall-list">${pitfalls.map(item => `<div class="pitfall-item">${item}</div>`).join('')}</div>` : ''}
     ${notes.length ? `<div class="section-label" style="margin-top:16px;margin-bottom:8px;">⚙️ 실무 노트</div>${notes.map(n => `<div class="dev-note"><h3>${n.h}</h3><ul>${n.items.map(item => `<li>${item}</li>`).join('')}</ul></div>`).join('')}` : ''}
     <div class="btn-row">
       <button class="btn" onclick="markDone(${idx})">${done ? '✓ 완료됨' : '학습 완료'}</button>
@@ -165,45 +180,97 @@ function nextChapter() {
   }
 }
 
-async function askAI(question) {
-  showScreen('ai');
-  document.getElementById('ai-input').value = question;
-  await sendAI();
+// ── 파이프라인 탭 ──
+let pipeItemProfiles = {};
+
+function togglePipeStep(n) {
+  const steps = document.querySelectorAll('.pipe-step');
+  const isOpen = steps[n].classList.contains('open');
+  steps.forEach(function(s) { s.classList.remove('open'); });
+  if (!isOpen) steps[n].classList.add('open');
 }
 
-async function sendAI() {
-  const inp = document.getElementById('ai-input');
-  const q = inp.value.trim();
-  if (!q) return;
-  const msgs = document.getElementById('ai-msgs');
-  msgs.innerHTML += `<div class="msg-user">${q}</div>`;
-  msgs.innerHTML += `<div class="msg-thinking" id="thinking">💭 생각 중...</div>`;
-  msgs.scrollTop = msgs.scrollHeight;
-  inp.value = '';
-
-  const cur = getLessonData(currentLesson);
+async function checkPipeApiStatus() {
+  const dot = document.getElementById('pipe-status-dot');
+  const text = document.getElementById('pipe-status-text');
+  const btn = document.getElementById('demo-run-btn');
+  if (!dot) return;
   try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-6',
-        max_tokens: 1000,
-        system: `당신은 추천 시스템 전문 AI 튜터입니다.
-현재 학습 챕터: ${cur.ch}. ${cur.title}
-답변 원칙: 한국어로 명확하게, 커머스(올리브영 등) 실무 예시 포함, 200-350자 내외로 간결하게.`,
-        messages: [{ role: 'user', content: q }]
-      })
+    const res = await fetch('http://127.0.0.1:8000/health', {
+      signal: AbortSignal.timeout(2000)
     });
-    const data = await res.json();
-    const ans = data.content?.find(b => b.type === 'text')?.text || '답변을 가져올 수 없습니다.';
-    document.getElementById('thinking')?.remove();
-    msgs.innerHTML += `<div class="msg-ai">${ans.replace(/\n/g, '<br>')}</div>`;
-    msgs.scrollTop = msgs.scrollHeight;
+    if (res.ok) {
+      dot.className = 'pipe-status-dot online';
+      text.textContent = '서버 연결됨 · localhost:8000';
+      if (btn) btn.disabled = false;
+      loadPipeItemProfiles();
+    } else {
+      setPipeOffline(dot, text, btn);
+    }
   } catch (e) {
-    document.getElementById('thinking')?.remove();
-    msgs.innerHTML += `<div class="msg-thinking">오류가 발생했습니다. 다시 시도해주세요.</div>`;
+    setPipeOffline(dot, text, btn);
   }
+}
+
+function setPipeOffline(dot, text, btn) {
+  dot.className = 'pipe-status-dot offline';
+  text.textContent = '서버 오프라인';
+  if (btn) btn.disabled = true;
+}
+
+async function loadPipeItemProfiles() {
+  try {
+    const res = await fetch('http://127.0.0.1:8000/item-profiles');
+    if (res.ok) pipeItemProfiles = await res.json();
+  } catch (e) {}
+}
+
+async function runDemo() {
+  const userId = document.getElementById('demo-user-select').value;
+  const model = document.getElementById('demo-model-select').value;
+  const resultBox = document.getElementById('demo-result-box');
+  const btn = document.getElementById('demo-run-btn');
+
+  btn.disabled = true;
+  btn.textContent = '로딩 중...';
+  resultBox.innerHTML = '<div class="demo-empty">추천 결과를 가져오는 중...</div>';
+
+  try {
+    const res = await fetch(
+      'http://127.0.0.1:8000/recommendations?user_id=' + userId + '&model=' + model + '&k=5'
+    );
+    const data = await res.json();
+
+    let rows = '';
+    data.items.forEach(function(item, i) {
+      const p = pipeItemProfiles[item.item_id] || {};
+      const meta = p.category
+        ? '<div class="demo-item-meta">' + p.category + ' · ' + p.brand + '</div>'
+        : '';
+      rows += '<div class="demo-result-item">'
+        + '<div><div class="demo-item-id">' + (i + 1) + '. ' + item.item_id + '</div>' + meta + '</div>'
+        + '<div class="demo-item-score">' + item.score.toFixed(4) + '</div>'
+        + '</div>';
+    });
+
+    const fallbackBadge = data.fallback_used
+      ? '<span class="demo-fallback-badge">fallback</span>' : '';
+
+    resultBox.innerHTML = '<div class="demo-result-header">'
+      + userId + ' · ' + model.toUpperCase() + ' ' + fallbackBadge + '</div>'
+      + '<div>' + rows + '</div>';
+  } catch (e) {
+    resultBox.innerHTML = '<div class="demo-empty">요청 실패. 서버를 확인해주세요.</div>';
+    checkPipeApiStatus();
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '추천 받기';
+  }
+}
+
+function initPipeline() {
+  checkPipeApiStatus();
+  setInterval(checkPipeApiStatus, 15000);
 }
 
 async function loadLearningData() {
@@ -233,6 +300,7 @@ async function initApp() {
     document.getElementById("lesson-body").innerHTML = '<div class="card">학습 데이터를 불러오지 못했습니다. 로컬 서버로 실행해주세요.</div>';
     console.error(error);
   }
+  initPipeline();
 }
 
 initApp();
