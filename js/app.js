@@ -94,7 +94,7 @@ function renderLesson(idx) {
       ${prerequisites.length ? `<div class="learning-guide"><h3>먼저 알면 좋은 것</h3><ul>${prerequisites.map(item => `<li>${item}</li>`).join('')}</ul></div>` : ''}
     </div>` : ''}
     <div class="section-label" style="margin-top:4px;margin-bottom:8px;">📚 핵심 개념</div>
-    ${l.concepts.map(c => `<div class="concept"><h3>${c.h}</h3><p>${c.p}</p></div>`).join('')}
+    ${l.concepts.map((c, i) => `<div class="concept"><span class="concept-num">${String(i+1).padStart(2,'0')}</span><h3>${c.h}</h3><p>${c.p}</p></div>`).join('')}
     ${deepDive.length ? `<div class="section-label" style="margin-top:16px;margin-bottom:8px;">🔎 심화 설명</div><div class="deep-list">${deepDive.map(item => `<div class="deep-item">${item}</div>`).join('')}</div>` : ''}
     ${terms.length ? `<div class="section-label" style="margin-top:16px;margin-bottom:8px;">🧩 처음 보는 용어</div><div class="term-list">${terms.map(t => `<div class="term-item"><h3>${t.term}</h3><p>${t.meaning}</p><p class="term-use">${t.use}</p></div>`).join('')}</div>` : ''}
     ${formulas.length ? `<div class="section-label" style="margin-top:16px;margin-bottom:8px;">∑ 공식과 사용법</div><div class="formula-list">${formulas.map(f => `<div class="formula-item"><h3>${f.name}</h3><code>${f.expression}</code><p>${f.howToUse}</p></div>`).join('')}</div>` : ''}
