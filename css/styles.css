@@ -147,16 +147,18 @@
     padding: 2px 8px; border-radius: 99px; vertical-align: middle;
     border: 1px solid currentColor; letter-spacing: 0.03em;
   }
-  .type-model    { color: #185FA5; background: #E6F1FB; }
-  .type-algorithm { color: #5A3E8A; background: #EEEDFE; }
-  .type-concept  { color: #0F6E56; background: #E1F5EE; }
-  .type-metric   { color: #854F0B; background: #FAEEDA; }
+  .type-model       { color: #185FA5; background: #E6F1FB; }
+  .type-algorithm   { color: #5A3E8A; background: #EEEDFE; }
+  .type-methodology { color: #B04F0A; background: #FEF0E6; }
+  .type-concept     { color: #0F6E56; background: #E1F5EE; }
+  .type-metric      { color: #854F0B; background: #FAEEDA; }
 
   @media (prefers-color-scheme: dark) {
-    .type-model    { color: #7AB8F5; background: #0a2040; }
-    .type-algorithm { color: #B0A0F0; background: #1a1840; }
-    .type-concept  { color: #4ECAA5; background: #0a3028; }
-    .type-metric   { color: #F0B060; background: #2a1a00; }
+    .type-model       { color: #7AB8F5; background: #0a2040; }
+    .type-algorithm   { color: #B0A0F0; background: #1a1840; }
+    .type-methodology { color: #F0A070; background: #2a1000; }
+    .type-concept     { color: #4ECAA5; background: #0a3028; }
+    .type-metric      { color: #F0B060; background: #2a1a00; }
   }
 
   .lesson-title { font-size: 18px; font-weight: 700; color: var(--text); margin-bottom: 4px; }

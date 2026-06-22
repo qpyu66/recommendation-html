@@ -61,7 +61,7 @@ function filterRoadmap(type) {
   });
 }
 
-const TYPE_LABEL = { model: '모델', algorithm: '알고리즘', concept: '개념', metric: '평가지표' };
+const TYPE_LABEL = { model: '모델', algorithm: '알고리즘', concept: '개념', methodology: '방법론', metric: '평가지표' };
 
 function renderLesson(idx) {
   const l = getLessonData(idx);
